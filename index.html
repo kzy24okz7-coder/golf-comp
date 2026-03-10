@@ -1,9 +1,3 @@
-<script>
-// ═══ 接続設定（ここだけ変更すればOK）═══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzu-b9SgY2qXkdv4Ef4erm7wpSmXv-cQD1kSnfhdNPKKDjYb8z8Ja5d5drei96JtmfQ/exec';
-const DRIVE_FOLDER = 'https://drive.google.com/drive/folders/1lWraAcCQ1kksfnGL4So4CtXaEPeH7nyP?usp=sharing';
-</script>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -28,38 +22,87 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
     repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(33,150,243,.04) 40px),
     repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(33,150,243,.04) 40px);}
 
+/* ═══ SETUP SCREEN ═══ */
+#setup-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.setup-box{
+  width:100%;max-width:480px;
+  background:linear-gradient(135deg,var(--card),var(--card2));
+  border:1px solid var(--br);border-radius:16px;padding:28px 24px;
+  position:relative;overflow:hidden;
+}
+.setup-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--bg2),transparent);}
+.setup-logo{text-align:center;margin-bottom:24px;}
+.setup-logo .ic{font-size:44px;filter:drop-shadow(0 0 12px rgba(0,200,255,.6));}
+.setup-logo .tx{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--bg2),var(--bb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:6px;}
+.setup-logo .sb{font-size:9px;color:var(--ts);letter-spacing:4px;margin-top:2px;}
+.setup-sec{font-size:9px;letter-spacing:2px;color:var(--ts);text-transform:uppercase;margin-bottom:10px;margin-top:18px;}
+.setup-fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.setup-fg label{font-size:10px;color:var(--ts);letter-spacing:1px;}
+.setup-fg input{
+  background:rgba(13,58,92,.5);border:1px solid var(--br);border-radius:8px;
+  height:var(--tap);padding:0 12px;color:var(--tx);font-size:13px;
+  font-family:'Noto Sans JP',sans-serif;outline:none;transition:.2s;width:100%;}
+.setup-fg input:focus{border-color:var(--bg2);box-shadow:0 0 8px rgba(0,200,255,.2);}
+.setup-fg input.err{border-color:var(--rd)!important;}
+.setup-fg .hint{font-size:9px;color:var(--ts);margin-top:2px;line-height:1.5;}
+.setup-fg .em{font-size:10px;color:var(--rd);display:none;}
+.mode-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.mode-card{
+  border:2px solid var(--br);border-radius:10px;padding:14px 10px;text-align:center;
+  cursor:pointer;transition:.25s;background:rgba(13,58,92,.2);}
+.mode-card:hover{border-color:var(--bb);background:rgba(33,150,243,.08);}
+.mode-card.sel{border-color:var(--bg2);background:rgba(0,200,255,.1);box-shadow:0 0 12px rgba(0,200,255,.2);}
+.mode-card .mc-ic{font-size:28px;margin-bottom:6px;}
+.mode-card .mc-title{font-size:12px;font-weight:700;color:var(--tx);}
+.mode-card .mc-sub{font-size:9px;color:var(--ts);margin-top:3px;line-height:1.4;}
+.btn-start{
+  width:100%;height:var(--tap);background:linear-gradient(135deg,var(--bm),var(--bb));
+  color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px;
+  font-family:'Noto Sans JP',sans-serif;letter-spacing:.5px;}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(33,150,243,.5);}
+.btn-start:active{transform:scale(.98);}
+
 /* ═══ HEADER ═══ */
 header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
   background:rgba(7,24,40,.98);border-bottom:1px solid var(--br);
   position:fixed;top:0;left:0;right:0;z-index:300;backdrop-filter:blur(12px);}
-.logo-ic{font-size:22px;filter:drop-shadow(0 0 7px rgba(0,200,255,.6));}
-.logo-tx{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;
+.logo-ic{font-size:20px;filter:drop-shadow(0 0 7px rgba(0,200,255,.6));}
+.logo-tx{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;
   background:linear-gradient(135deg,var(--bg2),var(--bb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .logo-sb{font-size:7px;color:var(--ts);letter-spacing:3px;}
 .hdr-r{margin-left:auto;display:flex;align-items:center;gap:5px;}
-.hpill{padding:0 10px;height:30px;border-radius:15px;font-size:10px;cursor:pointer;
+.mode-badge{
+  padding:0 10px;height:26px;border-radius:13px;font-size:10px;
+  display:flex;align-items:center;gap:4px;font-weight:700;letter-spacing:.5px;}
+.mode-badge.kanji{background:rgba(245,200,66,.15);border:1px solid rgba(245,200,66,.4);color:var(--gold);}
+.mode-badge.member{background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);color:var(--bg2);}
+.hpill{padding:0 9px;height:28px;border-radius:14px;font-size:10px;cursor:pointer;
   border:1px solid var(--br);background:rgba(13,58,92,.3);color:var(--ts);
-  transition:.2s;letter-spacing:.5px;white-space:nowrap;display:flex;align-items:center;gap:3px;}
+  transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:3px;}
 .hpill.on{background:rgba(0,200,255,.15);border-color:var(--bg2);color:var(--bg2);}
+.sync-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--br);background:rgba(13,58,92,.3);
+  color:var(--ts);font-size:14px;cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:center;}
+.sync-btn:hover{border-color:var(--bg2);color:var(--bg2);}
+.sync-btn.spinning{animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);};}
 .pulse{width:6px;height:6px;border-radius:50%;background:var(--gr);box-shadow:0 0 6px var(--gr);animation:pu 2s infinite;flex-shrink:0;}
+.pulse.offline{background:var(--rd);box-shadow:0 0 6px var(--rd);}
 @keyframes pu{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
 
-/* ═══ SAVE BANNER ═══ */
-.save-banner{
-  position:fixed;top:52px;left:0;right:0;z-index:250;
-  background:linear-gradient(90deg,rgba(245,200,66,.18),rgba(230,168,23,.12));
-  border-bottom:1px solid rgba(245,200,66,.35);
-  display:flex;align-items:center;gap:10px;padding:8px 16px;
-  transform:translateY(-60px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);
-}
-.save-banner.show{transform:translateY(0);}
-.save-banner .sb-ic{font-size:16px;}
-.save-banner .sb-msg{font-size:12px;color:var(--gold);flex:1;}
-.save-banner .sb-btn{
-  background:linear-gradient(135deg,var(--gold2),var(--gold));color:#000;
-  border:none;border-radius:8px;padding:0 16px;height:34px;font-size:12px;font-weight:700;
-  cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;}
-.save-banner .sb-dis{background:none;border:none;color:var(--ts);font-size:18px;cursor:pointer;padding:2px 6px;}
+/* ═══ LOADING OVERLAY ═══ */
+#loading{
+  position:fixed;inset:0;background:rgba(2,11,24,.92);z-index:800;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  backdrop-filter:blur(4px);}
+#loading.show{display:flex;}
+.spin-ring{width:44px;height:44px;border:3px solid rgba(0,200,255,.2);border-top-color:var(--bg2);border-radius:50%;animation:spin 1s linear infinite;}
+.loading-msg{font-size:13px;color:var(--ts);}
 
 /* ═══ LAYOUT ═══ */
 .main{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex;overflow:hidden;}
@@ -69,18 +112,19 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
 .si{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:.2s;border:1px solid transparent;min-height:var(--tap);}
 .si:hover{background:rgba(33,150,243,.08);border-color:var(--br);}
 .si.on{background:rgba(0,200,255,.1);border-color:var(--bg2);}
-.si.done .sd{background:var(--gr)!important;box-shadow:0 0 6px var(--gr);}
-.si.on .sd{background:var(--bg2);box-shadow:0 0 8px var(--bg2);}
+.si.done .sd{background:var(--gr)!important;}
+.si.on .sd{background:var(--bg2);}
 .sd{width:7px;height:7px;border-radius:50%;background:rgba(33,150,243,.25);flex-shrink:0;transition:.3s;}
-.sl strong{display:block;font-size:11px;color:var(--tx);}
+.sl strong{display:block;font-size:11px;}
 .sl span{font-size:9px;color:var(--ts);}
 .sdiv{height:1px;background:linear-gradient(90deg,transparent,var(--br),transparent);margin:6px 0;}
 .sfoot{margin-top:auto;padding:10px;background:rgba(13,58,92,.3);border-radius:9px;border:1px solid var(--br);}
 .sfoot .lbl{font-size:8px;color:var(--ts);letter-spacing:2px;text-transform:uppercase;}
-.sfoot .val{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--bg2);margin-bottom:5px;}
-.sfoot .save-st{font-size:9px;padding:3px 8px;border-radius:5px;display:inline-block;margin-top:3px;}
-.sfoot .save-st.saved{background:rgba(0,230,118,.12);color:var(--gr);border:1px solid rgba(0,230,118,.3);}
-.sfoot .save-st.unsaved{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
+.sfoot .val{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--bg2);margin-bottom:4px;}
+.sync-st{font-size:9px;margin-top:3px;}
+.sync-st.ok{color:var(--gr);}
+.sync-st.err{color:var(--rd);}
+.sync-st.ing{color:var(--gold);}
 
 .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .page{display:none;animation:fadeUp .3s ease;}
@@ -88,30 +132,30 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 .wrap{max-width:860px;margin:0 auto;padding:16px 12px 100px;}
 
-/* ═══ SECTION TITLE ═══ */
+/* ═══ READ-ONLY OVERLAY ═══ */
+.readonly-banner{
+  background:rgba(0,200,255,.07);border:1px solid rgba(0,200,255,.25);
+  border-radius:10px;padding:10px 14px;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ts);}
+.readonly-banner .rb-ic{font-size:18px;}
+
+/* ═══ CARD / SEC ═══ */
 .sec{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;color:var(--bg2);
   text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--bg2),transparent);opacity:.4;}
-
-/* ═══ CARD ═══ */
 .card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);
   border-radius:12px;padding:14px;margin-bottom:12px;position:relative;overflow:hidden;}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
   background:linear-gradient(90deg,transparent,var(--bb),transparent);}
 
-/* ═══ COMP HISTORY STRIP ═══ */
+/* comp strip */
 .comp-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
 .comp-strip::-webkit-scrollbar{height:2px;}
-.comp-strip::-webkit-scrollbar-thumb{background:var(--bd);border-radius:1px;}
-.comp-chip{
-  flex-shrink:0;padding:0 14px;height:34px;border-radius:17px;
-  border:1px solid var(--br);background:rgba(13,58,92,.3);
-  color:var(--ts);font-size:11px;cursor:pointer;transition:.2s;
+.comp-chip{flex-shrink:0;padding:0 14px;height:34px;border-radius:17px;border:1px solid var(--br);
+  background:rgba(13,58,92,.3);color:var(--ts);font-size:11px;cursor:pointer;transition:.2s;
   display:flex;align-items:center;gap:5px;white-space:nowrap;}
 .comp-chip:hover{border-color:var(--bb);color:var(--bb);}
-.comp-chip.on{background:rgba(0,200,255,.15);border-color:var(--bg2);color:var(--bg2);box-shadow:0 0 10px rgba(0,200,255,.2);}
-.comp-chip.new-chip{border-style:dashed;color:var(--gr);border-color:rgba(0,230,118,.4);}
-.comp-chip.new-chip:hover{background:rgba(0,230,118,.08);}
+.comp-chip.on{background:rgba(0,200,255,.15);border-color:var(--bg2);color:var(--bg2);}
 
 /* ═══ FORM ═══ */
 .fg{display:flex;flex-direction:column;gap:4px;}
@@ -120,7 +164,7 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
   background:rgba(13,58,92,.45);border:1px solid var(--br);border-radius:8px;
   padding:0 12px;height:var(--tap);color:var(--tx);
   font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;transition:.2s;width:100%;}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--bg2);box-shadow:0 0 8px rgba(0,200,255,.2);}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--bg2);}
 .fg textarea{height:60px;padding:10px 12px;resize:vertical;}
 .fg select option{background:#071828;}
 .fg input.err{border-color:var(--rd)!important;}
@@ -128,53 +172,49 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 @media(max-width:460px){.g2{grid-template-columns:1fr;}}
 
-/* ═══ PROGRESS ═══ */
+/* prog */
 .prog-wrap{margin-bottom:18px;}
 .prog-steps{display:flex;align-items:flex-start;}
-.prog-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative;z-index:1;}
+.prog-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
 .prog-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:12px;border:2px solid var(--br);background:var(--card);transition:.3s;font-weight:700;}
-.prog-step.on .prog-dot{border-color:var(--bg2);background:rgba(0,200,255,.15);box-shadow:0 0 14px rgba(0,200,255,.3);}
+.prog-step.on .prog-dot{border-color:var(--bg2);background:rgba(0,200,255,.15);}
 .prog-step.done .prog-dot{border-color:var(--gr);background:rgba(0,230,118,.15);color:var(--gr);}
 .prog-lbl{font-size:8px;color:var(--ts);text-align:center;white-space:nowrap;}
 .prog-step.on .prog-lbl{color:var(--bg2);}
 .prog-step.done .prog-lbl{color:var(--gr);}
-.prog-line{height:2px;background:var(--br);flex:1;margin-top:14px;transition:.4s;z-index:0;}
+.prog-line{height:2px;background:var(--br);flex:1;margin-top:14px;transition:.4s;}
 .prog-line.done{background:var(--gr);}
 
-/* ═══ SAVE BUTTON AREA ═══ */
-.save-area{
-  background:linear-gradient(135deg,rgba(13,58,92,.5),rgba(10,32,53,.5));
-  border:1px solid var(--border,var(--br));border-radius:12px;
-  padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.save-area .sa-info{flex:1;min-width:160px;}
-.save-area .sa-title{font-size:12px;color:var(--tx);font-weight:600;margin-bottom:3px;}
-.save-area .sa-sub{font-size:10px;color:var(--ts);}
-.save-area .sa-status{font-size:10px;margin-top:4px;}
-.btn-save{
-  background:linear-gradient(135deg,var(--gold2),var(--gold));color:#000;
-  border:none;border-radius:9px;padding:0 22px;height:var(--tap);
+/* save area */
+.save-area{background:rgba(13,58,92,.3);border:1px solid rgba(245,200,66,.25);
+  border-radius:12px;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.sa-info{flex:1;min-width:140px;}
+.sa-title{font-size:12px;font-weight:600;margin-bottom:2px;}
+.sa-sub{font-size:10px;color:var(--ts);}
+.sa-status{font-size:10px;margin-top:4px;}
+.btn-save{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#000;
+  border:none;border-radius:9px;padding:0 20px;height:var(--tap);
   font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;
-  cursor:pointer;display:flex;align-items:center;gap:7px;transition:.25s;white-space:nowrap;}
+  cursor:pointer;display:flex;align-items:center;gap:6px;transition:.25s;white-space:nowrap;}
 .btn-save:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,200,66,.5);}
 .btn-save:active{transform:scale(.97);}
-.btn-save.saving{opacity:.7;pointer-events:none;}
+.btn-save:disabled{opacity:.5;pointer-events:none;}
 
-/* ═══ PLAYERS ═══ */
+/* players */
 .plist{display:flex;flex-direction:column;gap:6px;}
 .pcard{background:rgba(13,58,92,.2);border:1px solid var(--br);border-radius:10px;overflow:hidden;transition:border-color .2s;}
-.pcard:hover{border-color:rgba(33,150,243,.5);}
+.pcard:hover{border-color:rgba(33,150,243,.4);}
 .pcard-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;min-height:var(--tap);user-select:none;}
 .av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid;flex-shrink:0;}
 .pname{font-size:14px;font-weight:600;flex:1;}
 .phcp{font-size:9px;color:var(--ts);}
-.pgross{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--bg2);}
 .pchev{color:var(--ts);font-size:16px;transition:.3s;flex-shrink:0;}
 .pcard.open .pchev{transform:rotate(90deg);}
 .pbody{display:none;padding:12px;border-top:1px solid rgba(33,150,243,.1);}
 .pcard.open .pbody{display:block;}
 
-/* ═══ HOLE SCORE GRID ═══ */
+/* score grid */
 .sc-section{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:6px;}
 .sc-section-lbl{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--bg2);letter-spacing:2px;}
 .sc-section-line{height:1px;background:linear-gradient(90deg,var(--bg2),transparent);opacity:.3;}
@@ -185,7 +225,7 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
 .sc-par{font-size:8px;color:var(--gold);}
 .sc-inp{width:100%;aspect-ratio:1;border-radius:7px;border:1px solid var(--br);background:rgba(13,58,92,.5);
   color:var(--tx);text-align:center;font-size:15px;font-weight:700;outline:none;transition:.15s;
-  -moz-appearance:textfield;cursor:pointer;padding:0;}
+  -moz-appearance:textfield;padding:0;}
 .sc-inp::-webkit-inner-spin-button,.sc-inp::-webkit-outer-spin-button{-webkit-appearance:none;}
 .sc-inp:focus{border-color:var(--bg2);background:rgba(0,200,255,.1);}
 .sc-inp.eagle{background:rgba(0,230,118,.3)!important;border-color:var(--gr)!important;color:#fff!important;}
@@ -198,14 +238,10 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
 .sc-btn{flex:1;height:22px;border:1px solid var(--br);border-radius:4px;background:rgba(13,58,92,.4);
   color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
 .sc-btn:active{background:rgba(0,200,255,.2);color:var(--bg2);}
-
-/* mini stats */
 .mst{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;}
 .ms{background:rgba(13,58,92,.35);border:1px solid var(--br);border-radius:7px;padding:7px 4px;text-align:center;}
 .mv{font-family:'Orbitron',sans-serif;font-size:14px;color:var(--bg2);}
-.ml{font-size:8px;color:var(--ts);letter-spacing:.5px;text-transform:uppercase;margin-top:1px;}
-
-/* extra stats stepper */
+.ml{font-size:8px;color:var(--ts);letter-spacing:.5px;margin-top:1px;}
 .xst-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
 .xst-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .xst-label{font-size:11px;color:var(--ts);flex:1;}
@@ -215,68 +251,62 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
   color:var(--ts);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
 .xst-btn:active{background:rgba(0,200,255,.2);color:var(--bg2);}
 
-/* ═══ BUTTONS ═══ */
+/* buttons */
 .btn{border:none;border-radius:9px;padding:0 18px;height:var(--tap);
   font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
-  letter-spacing:.5px;transition:.25s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+  transition:.25s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
 .btn:active{transform:scale(.97);}
 .bp{background:linear-gradient(135deg,var(--bm),var(--bb));color:#fff;box-shadow:0 4px 14px rgba(33,150,243,.4);}
 .bp:hover{transform:translateY(-2px);}
-.bg0{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#000;box-shadow:0 4px 14px rgba(245,200,66,.35);}
+.bg0{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#000;}
 .bg0:hover{transform:translateY(-2px);}
 .bgh{background:transparent;border:1px solid var(--br);color:var(--ts);}
 .bgh:hover{border-color:var(--bg2);color:var(--bg2);}
 .bdn{background:rgba(255,82,82,.12);border:1px solid rgba(255,82,82,.3);color:var(--rd);height:34px;padding:0 12px;font-size:11px;}
-.bdn:active{background:rgba(255,82,82,.25);}
 .brow{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px;}
 .apb{display:flex;align-items:center;gap:10px;min-height:var(--tap);padding:0 14px;
   background:rgba(33,150,243,.05);border:1px dashed var(--br);border-radius:10px;
   cursor:pointer;transition:.2s;color:var(--ts);font-size:13px;}
-.apb:hover,.apb:active{background:rgba(0,200,255,.1);border-color:var(--bg2);color:var(--bg2);}
+.apb:hover{background:rgba(0,200,255,.1);border-color:var(--bg2);color:var(--bg2);}
 
-/* ═══ UPLOAD - REAL FILE ═══ */
+/* media */
 .upz{border:2px dashed var(--br);border-radius:10px;padding:22px;text-align:center;
   cursor:pointer;transition:.3s;background:rgba(13,58,92,.1);
   display:flex;flex-direction:column;align-items:center;gap:6px;}
 .upz:active{border-color:var(--bg2);}
-.umg{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px;}
+.umg{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:10px;}
 .um{aspect-ratio:1;border-radius:8px;border:1px solid var(--br);background:rgba(13,58,92,.4);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
   position:relative;cursor:pointer;transition:.2s;overflow:hidden;}
 .um:active{border-color:var(--bg2);}
-.um img,.um video{width:100%;height:100%;object-fit:cover;border-radius:7px;}
+.um img,.um video{width:100%;height:100%;object-fit:cover;}
 .um .um-overlay{position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.8));display:flex;flex-direction:column;justify-content:flex-end;padding:4px;}
-.um .um-name{font-size:7px;color:var(--ts);text-align:center;line-height:1.2;word-break:break-all;}
-.um .um-del{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;
-  background:rgba(255,82,82,.9);border:none;color:#fff;font-size:11px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;z-index:10;line-height:1;}
-.um .vbadge{position:absolute;top:3px;left:3px;background:rgba(255,82,82,.9);border-radius:3px;padding:1px 4px;font-size:7px;font-weight:700;}
-.um-empty{font-size:20px;color:var(--ts);}
-.up-count{font-size:10px;color:var(--ts);margin-top:6px;}
+.um .um-name{font-size:7px;color:var(--ts);text-align:center;word-break:break-all;line-height:1.2;}
+.um .um-del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;
+  background:rgba(255,82,82,.9);border:none;color:#fff;font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;z-index:10;}
+.um .vbg{position:absolute;top:3px;left:3px;background:rgba(255,82,82,.9);border-radius:3px;padding:1px 4px;font-size:7px;font-weight:700;}
+.um-prog{position:absolute;inset:0;background:rgba(7,24,40,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.um-prog .up-pct{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--bg2);}
+.um-prog .up-bar{width:70%;height:3px;background:rgba(33,150,243,.2);border-radius:2px;overflow:hidden;}
+.um-prog .up-bar-f{height:100%;background:var(--bg2);transition:width .3s;}
 
-/* ═══ RESULT ═══ */
+/* result */
 .sband{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
 @media(max-width:500px){.sband{grid-template-columns:repeat(2,1fr);}}
-.sbc{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);
-  border-radius:9px;padding:11px;text-align:center;position:relative;overflow:hidden;}
-.sbc::after{content:'';position:absolute;bottom:0;right:0;width:32px;height:32px;border-radius:50% 0 0 0;background:rgba(33,150,243,.05);}
-.sbv{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;
-  background:linear-gradient(135deg,var(--bg2),var(--bb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:2px;}
+.sbc{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);border-radius:9px;padding:11px;text-align:center;position:relative;overflow:hidden;}
+.sbv{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--bg2),var(--bb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:2px;}
 .sbl{font-size:8px;color:var(--ts);letter-spacing:2px;text-transform:uppercase;}
 .sbic{font-size:14px;margin-bottom:3px;}
 .tbar{display:flex;gap:3px;margin-bottom:12px;background:rgba(13,58,92,.3);border-radius:9px;padding:3px;border:1px solid var(--br);}
-.tbtn{flex:1;height:34px;border:none;border-radius:7px;background:transparent;color:var(--ts);
-  font-family:'Noto Sans JP',sans-serif;font-size:10px;cursor:pointer;transition:.2s;}
-.tbtn.on{background:linear-gradient(135deg,var(--bm),var(--bd));color:var(--bg2);box-shadow:0 0 10px rgba(0,200,255,.15);}
+.tbtn{flex:1;height:34px;border:none;border-radius:7px;background:transparent;color:var(--ts);font-family:'Noto Sans JP',sans-serif;font-size:10px;cursor:pointer;transition:.2s;}
+.tbtn.on{background:linear-gradient(135deg,var(--bm),var(--bd));color:var(--bg2);}
 .rklist{display:flex;flex-direction:column;gap:7px;}
-.rki{display:flex;align-items:center;gap:9px;padding:10px 12px;
-  background:rgba(13,58,92,.2);border:1px solid var(--br);border-radius:10px;transition:.2s;}
-.rki:hover{background:rgba(33,150,243,.08);}
+.rki{display:flex;align-items:center;gap:9px;padding:10px 12px;background:rgba(13,58,92,.2);border:1px solid var(--br);border-radius:10px;}
 .rkn{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;min-width:24px;text-align:center;}
 .rk1{color:var(--gold);text-shadow:0 0 10px rgba(245,200,66,.5);}
 .rk2{color:var(--sv);}
 .rk3{color:#cd7f32;}
-.rksc{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:var(--bg2);text-align:right;}
+.rksc{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:var(--bg2);}
 .pb{height:3px;background:rgba(33,150,243,.1);border-radius:2px;margin-top:4px;overflow:hidden;}
 .pbf{height:100%;border-radius:2px;transition:width 1s ease;}
 .cg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
@@ -287,121 +317,143 @@ header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
 .rdrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;}
 .rdcard{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);border-radius:11px;padding:13px;}
 .rdh{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
-
-/* heatmap */
 .hmg{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;}
 .hmc{aspect-ratio:1;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.03);}
 .hmn{font-weight:700;font-size:10px;}
 .hma{font-size:8px;opacity:.8;}
-
-/* gallery */
 .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
-.gi{aspect-ratio:1;border-radius:8px;border:1px solid var(--br);background:rgba(13,58,92,.4);
-  overflow:hidden;cursor:pointer;transition:.2s;position:relative;}
-.gi:active{border-color:var(--bg2);}
+.gi{aspect-ratio:1;border-radius:8px;border:1px solid var(--br);overflow:hidden;cursor:pointer;position:relative;}
 .gi img,.gi video{width:100%;height:100%;object-fit:cover;}
 .gi .gi-overlay{position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.8));display:flex;flex-direction:column;justify-content:flex-end;padding:5px;}
-.gi .gi-name{font-size:8px;color:var(--ts);}
-.gi .gi-vbadge{position:absolute;top:4px;left:4px;background:rgba(255,82,82,.9);border-radius:3px;padding:1px 4px;font-size:7px;font-weight:700;}
+.gi-name{font-size:8px;color:var(--ts);}
+.gi-vb{position:absolute;top:4px;left:4px;background:rgba(255,82,82,.9);border-radius:3px;padding:1px 4px;font-size:7px;font-weight:700;}
 
-/* history list */
-.hist-item{display:flex;align-items:center;gap:10px;padding:11px 13px;
-  background:rgba(13,58,92,.2);border:1px solid var(--br);border-radius:10px;
-  cursor:pointer;transition:.2s;margin-bottom:7px;}
-.hist-item:hover{background:rgba(33,150,243,.1);border-color:var(--bm);}
+/* history */
+.hist-item{display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(13,58,92,.2);border:1px solid var(--br);border-radius:10px;cursor:pointer;transition:.2s;margin-bottom:7px;}
+.hist-item:hover{background:rgba(33,150,243,.1);}
 .hist-item.on{background:rgba(0,200,255,.1);border-color:var(--bg2);}
 .hist-num{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--bg2);min-width:36px;}
 .hist-info{flex:1;}
 .hist-title{font-size:13px;font-weight:600;}
 .hist-sub{font-size:10px;color:var(--ts);margin-top:2px;}
-.hist-winner{font-size:12px;color:var(--gold);}
-.hist-del{width:28px;height:28px;border-radius:7px;background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.3);color:var(--rd);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hist-del{width:28px;height:28px;border-radius:7px;background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.3);color:var(--rd);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-/* ═══ TOAST ═══ */
+/* toast */
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(80px);
   background:linear-gradient(135deg,#0d3a5c,#1565a8);border:1px solid var(--bg2);
   border-radius:22px;padding:9px 20px;font-size:12px;color:var(--bg2);
-  box-shadow:0 8px 28px rgba(0,0,0,.6),var(--glow);z-index:999;
+  box-shadow:0 8px 28px rgba(0,0,0,.6);z-index:999;
   transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:90vw;text-align:center;}
 #toast.show{transform:translateX(-50%) translateY(0);}
 #toast.ok{border-color:var(--gr);color:var(--gr);background:linear-gradient(135deg,#0a2a18,#0d4020);}
 #toast.err{border-color:var(--rd);color:var(--rd);background:linear-gradient(135deg,#2a0a0a,#400d0d);}
+#toast.warn{border-color:var(--gold);color:var(--gold);background:linear-gradient(135deg,#2a1f00,#3a2a00);}
 
-/* ═══ MODAL ═══ */
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;
-  align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);}
+/* modal */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);}
 .mo.open{display:flex;animation:fadeUp .3s ease;}
-.mob{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--br);
-  border-radius:16px 16px 0 0;padding:18px 16px 32px;
-  width:100%;max-width:500px;max-height:88vh;overflow-y:auto;}
+.mob{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--br);border-radius:16px 16px 0 0;padding:18px 16px 32px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;}
 @media(min-width:520px){.mo{align-items:center;}.mob{border-radius:16px;max-height:80vh;}}
 .mob-handle{width:36px;height:4px;border-radius:2px;background:var(--br);margin:0 auto 14px;}
 .mot{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--bg2);margin-bottom:14px;letter-spacing:2px;}
 .moc{float:right;background:none;border:none;color:var(--ts);font-size:20px;cursor:pointer;padding:4px;}
 .cp-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px;}
 .cp-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s;}
-.cp-dot.sel{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.4);}
+.cp-dot.sel{border-color:#fff;}
 .conf-ico{font-size:44px;text-align:center;margin:8px 0 10px;}
 .conf-msg{font-size:13px;text-align:center;color:var(--ts);line-height:1.6;margin-bottom:16px;}
 
-/* image viewer modal */
+/* image viewer */
 #moImg .mob{background:#000;border-radius:12px;padding:10px;}
 #moImg img,#moImg video{max-width:100%;max-height:70vh;border-radius:8px;display:block;margin:0 auto;}
 
-/* ═══ MOBILE NAV ═══ */
-.mnav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(7,24,40,.98);
-  border-top:1px solid var(--br);z-index:200;backdrop-filter:blur(12px);
-  padding-bottom:env(safe-area-inset-bottom);}
+/* mobile nav */
+.mnav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(7,24,40,.98);border-top:1px solid var(--br);z-index:200;backdrop-filter:blur(12px);padding-bottom:env(safe-area-inset-bottom);}
 @media(max-width:640px){.mnav{display:flex;}}
-.mnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
-  padding:7px 2px 5px;border:none;background:transparent;color:var(--ts);
-  font-family:'Noto Sans JP',sans-serif;font-size:9px;cursor:pointer;transition:.2s;min-height:var(--tap);}
+.mnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px 5px;border:none;background:transparent;color:var(--ts);font-family:'Noto Sans JP',sans-serif;font-size:9px;cursor:pointer;transition:.2s;min-height:var(--tap);}
 .mnb.on{color:var(--bg2);}
 .mni{font-size:20px;line-height:1;}
 
-/* ═══ MISC ═══ */
+/* misc */
 .dv{height:1px;background:linear-gradient(90deg,transparent,var(--br),transparent);margin:12px 0;}
 .tg{display:inline-block;padding:2px 6px;border-radius:4px;font-size:8px;letter-spacing:.5px;text-transform:uppercase;}
 .tgb{background:rgba(33,150,243,.15);color:var(--bb);border:1px solid rgba(33,150,243,.3);}
 .tgg{background:rgba(0,230,118,.15);color:var(--gr);border:1px solid rgba(0,230,118,.3);}
-.tgo{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
 .tgr{background:rgba(255,82,82,.15);color:var(--rd);border:1px solid rgba(255,82,82,.3);}
 ::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px;}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 input[type=number]{-moz-appearance:textfield;}
-.vbadge-inline{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:10px;}
-.vb-ok{background:rgba(0,230,118,.12);color:var(--gr);border:1px solid rgba(0,230,118,.3);}
-.vb-wip{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
-.vb-ng{background:rgba(120,166,200,.08);color:var(--ts);border:1px solid var(--br);}
 </style>
 </head>
 <body>
 
+<!-- ═══ SETUP SCREEN ═══ -->
+<div id="setup-screen">
+  <div class="setup-box">
+    <div class="setup-logo">
+      <div class="ic">⛳</div>
+      <div class="tx">GOLF COMP</div>
+      <div class="sb">Dashboard v5</div>
+    </div>
+
+    <div class="setup-sec">① Apps Script URL（必須）</div>
+    <div class="setup-fg">
+      <label>Google Apps Script ウェブアプリURL</label>
+      <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/xxxxx/exec">
+      <div class="em" id="e-cfg-url">URLを入力してください</div>
+      <div class="hint">Apps ScriptをデプロイしたウェブアプリURLを入力してください</div>
+    </div>
+
+    <div class="setup-sec">② モード選択（必須）</div>
+    <div class="mode-sel">
+      <div class="mode-card sel" id="mc-kanji" onclick="selMode('kanji')">
+        <div class="mc-ic">🎯</div>
+        <div class="mc-title">幹事モード</div>
+        <div class="mc-sub">スコア入力・写真管理・全機能が使えます</div>
+      </div>
+      <div class="mode-card" id="mc-member" onclick="selMode('member')">
+        <div class="mc-ic">👀</div>
+        <div class="mc-title">メンバーモード</div>
+        <div class="mc-sub">結果・写真の閲覧のみ（リアルタイム更新）</div>
+      </div>
+    </div>
+
+    <div class="setup-sec">③ 幹事PINコード（幹事モードのみ）</div>
+    <div class="setup-fg" id="pin-area">
+      <label>PINコード（数字4桁）</label>
+      <input type="number" id="cfg-pin" placeholder="例: 1234" inputmode="numeric" maxlength="4">
+      <div class="em" id="e-cfg-pin">4桁の数字を入力してください</div>
+      <div class="hint">初回設定時に任意の4桁を決めてください。次回以降も同じPINを使います。</div>
+    </div>
+
+    <button class="btn-start" onclick="startApp()">
+      <span id="start-ic">🚀</span> ダッシュボードを開く
+    </button>
+  </div>
+</div>
+
+<!-- ═══ LOADING ═══ -->
+<div id="loading">
+  <div class="spin-ring"></div>
+  <div class="loading-msg" id="loading-msg">データを読み込み中...</div>
+</div>
+
 <!-- ═══ HEADER ═══ -->
 <header>
   <div class="logo-ic">⛳</div>
-  <div><div class="logo-tx">GOLF COMP</div><div class="logo-sb">Dashboard v4</div></div>
+  <div><div class="logo-tx">GOLF COMP</div><div class="logo-sb">Live Dashboard</div></div>
   <div class="hdr-r">
+    <div class="mode-badge" id="mode-badge">—</div>
     <button class="hpill" id="hp1" onclick="goPg('p1')">📋情報</button>
-    <button class="hpill" id="hp2" onclick="goPg('p2')">🏌️スコア</button>
     <button class="hpill" id="hp4" onclick="goPg('p4')">📊結果</button>
-    <span class="pulse"></span>
+    <button class="sync-btn" id="sync-btn" onclick="syncAll()" title="最新データに更新">🔄</button>
+    <span class="pulse" id="conn-pulse"></span>
   </div>
 </header>
 
-<!-- ═══ SAVE BANNER（未保存警告）═══ -->
-<div class="save-banner" id="saveBanner">
-  <span class="sb-ic">💾</span>
-  <span class="sb-msg">未保存の変更があります</span>
-  <button class="sb-btn" onclick="saveAll()">💾 今すぐ保存</button>
-  <button class="sb-dis" onclick="hideBanner()" title="閉じる">×</button>
-</div>
-
-<!-- ═══ MAIN ═══ -->
 <div class="main">
-
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="si on" id="s1" onclick="goPg('p1')"><div class="sd" id="d1"></div><div class="sl"><strong>① 大会情報</strong><span>コンペ基本情報</span></div></div>
@@ -411,14 +463,13 @@ input[type=number]{-moz-appearance:textfield;}
     <div class="si" id="s4" onclick="goPg('p4')"><div class="sd" id="d4"></div><div class="sl"><strong>📊 結果表示</strong><span>リアルタイム集計</span></div></div>
     <div class="sdiv"></div>
     <div class="sfoot">
-      <div class="lbl">現在のコンペ</div><div class="val" id="sb-comp">—</div>
-      <div class="lbl">参加者数</div><div class="val" id="sbm">0名</div>
-      <div class="lbl">保存状態</div>
-      <div class="save-st unsaved" id="sb-savest">● 未保存</div>
+      <div class="lbl">コンペ</div><div class="val" id="sb-comp">—</div>
+      <div class="lbl">参加者</div><div class="val" id="sbm">0名</div>
+      <div class="lbl">最終同期</div>
+      <div class="sync-st" id="sb-sync">—</div>
     </div>
   </div>
 
-  <!-- CONTENT -->
   <div class="content" id="cnt">
 
     <!-- ── PAGE 1: 大会情報 ── -->
@@ -435,34 +486,31 @@ input[type=number]{-moz-appearance:textfield;}
         </div>
       </div>
 
-      <!-- コンペ選択・新規 -->
       <div class="sec">📅 コンペ選択 / 新規作成</div>
       <div style="display:flex;gap:7px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
         <div class="comp-strip" id="comp-strip"></div>
-        <button class="btn bp" style="height:34px;font-size:11px;padding:0 14px;flex-shrink:0;" onclick="newComp()">＋ 新規コンペ</button>
+        <button class="btn bp" style="height:34px;font-size:11px;padding:0 14px;flex-shrink:0;" id="new-comp-btn" onclick="newComp()">＋ 新規コンペ</button>
       </div>
 
-      <div class="sec">📋 大会情報入力</div>
+      <div id="p1-readonly" class="readonly-banner" style="display:none;">
+        <span class="rb-ic">👀</span>
+        <span>メンバーモード：閲覧専用です。編集は幹事にお願いください。</span>
+      </div>
+
+      <div class="sec">📋 大会情報</div>
       <div class="card">
-        <div class="ct" style="margin-bottom:12px;"><span>🏆</span>大会基本情報</div>
         <div class="g2">
-          <div class="fg"><label>大会名 <span style="color:var(--rd)">*</span></label><input type="text" id="f-title" placeholder="例: 第12回 春季親睦コンペ" oninput="markDirty()"><span class="em" id="e-title">大会名を入力してください</span></div>
-          <div class="fg"><label>開催日 <span style="color:var(--rd)">*</span></label><input type="date" id="f-date" onchange="markDirty()"><span class="em" id="e-date">開催日を選択してください</span></div>
-          <div class="fg"><label>コース名 <span style="color:var(--rd)">*</span></label><input type="text" id="f-course" placeholder="例: 皇太子記念GC" oninput="markDirty()"><span class="em" id="e-course">コース名を入力してください</span></div>
-          <div class="fg"><label>コースレート / パー</label><input type="text" id="f-par" value="71.8 / Par72" oninput="markDirty()"></div>
-          <div class="fg"><label>天候</label><select id="f-weather" onchange="markDirty()"><option>☀️ 晴れ</option><option>⛅ 曇り</option><option>🌧 雨</option><option>🌬 強風</option><option>❄️ 冬晴れ</option></select></div>
-          <div class="fg"><label>競技方式</label><select id="f-format" onchange="markDirty()"><option>ストロークプレー（ネット）</option><option>ストロークプレー（グロス）</option><option>ダブルペリア方式</option><option>マッチプレー</option></select></div>
-          <div class="fg" style="grid-column:1/-1"><label>メモ</label><textarea id="f-memo" placeholder="当日の状況や特記事項..." oninput="markDirty()"></textarea></div>
+          <div class="fg"><label>大会名 <span style="color:var(--rd)">*</span></label><input type="text" id="f-title" placeholder="例: 第12回 春季親睦コンペ"><span class="em" id="e-title">大会名を入力してください</span></div>
+          <div class="fg"><label>開催日</label><input type="date" id="f-date"></div>
+          <div class="fg"><label>コース名 <span style="color:var(--rd)">*</span></label><input type="text" id="f-course" placeholder="例: 皇太子記念GC"><span class="em" id="e-course">コース名を入力してください</span></div>
+          <div class="fg"><label>コースレート / パー</label><input type="text" id="f-par" value="71.8 / Par72"></div>
+          <div class="fg"><label>天候</label><select id="f-weather"><option>☀️ 晴れ</option><option>⛅ 曇り</option><option>🌧 雨</option><option>🌬 強風</option><option>❄️ 冬晴れ</option></select></div>
+          <div class="fg"><label>競技方式</label><select id="f-format"><option>ストロークプレー（ネット）</option><option>ストロークプレー（グロス）</option><option>ダブルペリア方式</option><option>マッチプレー</option></select></div>
+          <div class="fg" style="grid-column:1/-1"><label>メモ</label><textarea id="f-memo" placeholder="当日の状況や特記事項..."></textarea></div>
         </div>
       </div>
-
-      <!-- 保存エリア -->
-      <div class="save-area">
-        <div class="sa-info">
-          <div class="sa-title">💾 大会情報を保存</div>
-          <div class="sa-sub">保存するとスコア入力画面に進めます</div>
-          <div class="sa-status" id="info-save-st"></div>
-        </div>
+      <div class="save-area" id="info-save-area">
+        <div class="sa-info"><div class="sa-title">💾 大会情報を保存</div><div class="sa-sub">Googleスプレッドシートに保存されます</div><div class="sa-status" id="info-save-st"></div></div>
         <button class="btn-save" onclick="saveInfoAndNext()">💾 保存してスコア入力へ →</button>
       </div>
     </div></div>
@@ -474,37 +522,31 @@ input[type=number]{-moz-appearance:textfield;}
           <div class="prog-step done" onclick="goPg('p1')"><div class="prog-dot">✓</div><div class="prog-lbl">大会情報</div></div>
           <div class="prog-line done"></div>
           <div class="prog-step on"><div class="prog-dot">2</div><div class="prog-lbl">スコア</div></div>
-          <div class="prog-line" id="pl2b"></div>
+          <div class="prog-line"></div>
           <div class="prog-step" onclick="goPg('p3')"><div class="prog-dot">3</div><div class="prog-lbl">メディア</div></div>
           <div class="prog-line"></div>
           <div class="prog-step" onclick="goPg('p4')"><div class="prog-dot" style="font-size:11px">📊</div><div class="prog-lbl">結果</div></div>
         </div>
       </div>
+      <div id="p2-readonly" class="readonly-banner" style="display:none;"><span class="rb-ic">👀</span><span>メンバーモード：閲覧専用です。</span></div>
       <div class="sec">🏌️ スコア入力</div>
       <div class="card">
         <div style="display:flex;align-items:center;margin-bottom:12px;gap:8px;">
           <div class="ct" style="margin:0;flex:1;"><span>👥</span>参加者 <span id="pcnt" style="font-size:12px;margin-left:4px;color:var(--bg2);">0名</span></div>
           <div id="all-status" style="font-size:10px;color:var(--ts);">—</div>
         </div>
-        <div class="plist" id="plist"><div style="text-align:center;color:var(--ts);font-size:13px;padding:20px;">＋ 参加者を追加してください</div></div>
+        <div class="plist" id="plist"><div style="text-align:center;color:var(--ts);font-size:13px;padding:20px;">参加者を追加してください</div></div>
         <div class="dv"></div>
-        <div class="apb" onclick="openAddMo()" id="apb-btn"><span style="font-size:22px;">➕</span><span>参加者を追加する</span><span style="margin-left:auto;font-size:10px;color:var(--ts);" id="apb-hint">最大8名</span></div>
+        <div class="apb" id="apb-btn" onclick="openAddMo()"><span style="font-size:22px;">➕</span><span>参加者を追加する</span><span style="margin-left:auto;font-size:10px;color:var(--ts);" id="apb-hint">最大8名</span></div>
       </div>
-
-      <!-- 保存エリア -->
-      <div class="save-area">
-        <div class="sa-info">
-          <div class="sa-title">💾 スコアを保存</div>
-          <div class="sa-sub">入力内容をブラウザに保存します（リロードしても消えません）</div>
-          <div class="sa-status" id="score-save-st"></div>
-        </div>
-        <button class="btn-save" onclick="saveAll()">💾 スコアを保存</button>
+      <div class="save-area" id="score-save-area">
+        <div class="sa-info"><div class="sa-title">💾 スコアを保存</div><div class="sa-sub">Googleスプレッドシートに保存。メンバーに即時反映されます。</div><div class="sa-status" id="score-save-st"></div></div>
+        <button class="btn-save" onclick="saveScores()">💾 スコアを保存</button>
       </div>
-
       <div class="brow">
         <button class="btn bgh" onclick="goPg('p1')">← 大会情報</button>
         <button class="btn bp" onclick="goPg('p3')">メディアへ →</button>
-        <button class="btn bg0" onclick="goRes()">📊 結果を見る →</button>
+        <button class="btn bg0" onclick="goPg('p4')">📊 結果を見る →</button>
       </div>
     </div></div>
 
@@ -521,41 +563,28 @@ input[type=number]{-moz-appearance:textfield;}
           <div class="prog-step" onclick="goPg('p4')"><div class="prog-dot" style="font-size:11px">📊</div><div class="prog-lbl">結果</div></div>
         </div>
       </div>
+      <div id="p3-readonly" class="readonly-banner" style="display:none;"><span class="rb-ic">👀</span><span>メンバーモード：閲覧専用です。</span></div>
       <div class="sec">📸 メディア管理</div>
       <div class="card">
-        <div class="ct" style="margin-bottom:10px;"><span>📁</span>写真・動画アップロード <span id="media-count" style="font-size:10px;color:var(--ts);margin-left:4px;"></span></div>
-        <div class="upz" onclick="document.getElementById('fi').click()">
+        <div class="ct" style="margin-bottom:10px;"><span>📁</span>写真・動画 <span id="media-count" style="font-size:10px;color:var(--ts);margin-left:4px;"></span></div>
+        <div class="upz" id="upz" onclick="document.getElementById('fi').click()">
           <div style="font-size:28px;">📁</div>
           <div style="font-size:13px;color:var(--ts);">タップしてファイルを選択</div>
-          <div style="font-size:9px;color:rgba(120,166,200,.5);">JPEG / PNG / MP4 対応 ・ 複数選択可</div>
+          <div style="font-size:9px;color:rgba(120,166,200,.5);">JPEG / PNG / MP4 ・ 複数選択可 ・ 1ファイル最大10MB</div>
         </div>
         <div class="umg" id="umg"></div>
         <input type="file" id="fi" style="display:none" accept="image/*,video/*" multiple onchange="handleFiles(event)">
       </div>
-
-      <!-- 保存エリア -->
-      <div class="save-area">
-        <div class="sa-info">
-          <div class="sa-title">💾 メディアを保存</div>
-          <div class="sa-sub">アップロードした写真・動画をブラウザに保存します</div>
-          <div class="sa-status" id="media-save-st"></div>
-        </div>
-        <button class="btn-save" onclick="saveAll()">💾 メディアを保存</button>
-      </div>
-
       <div class="brow">
         <button class="btn bgh" onclick="goPg('p2')">← スコア</button>
-        <button class="btn bg0" onclick="goRes()">📊 結果サマリーを表示 →</button>
+        <button class="btn bg0" onclick="goPg('p4')">📊 結果へ →</button>
       </div>
     </div></div>
 
     <!-- ── PAGE 4: 結果 ── -->
     <div class="page" id="p4"><div class="wrap">
-
-      <!-- コンペ選択ストリップ -->
       <div class="sec">📅 コンペ選択</div>
       <div class="comp-strip" id="res-comp-strip" style="margin-bottom:14px;"></div>
-
       <div class="sband" id="resst"></div>
       <div class="tbar">
         <button class="tbtn on" onclick="swTab('tr',this)">🏅 順位</button>
@@ -564,7 +593,6 @@ input[type=number]{-moz-appearance:textfield;}
         <button class="tbtn" onclick="swTab('tgal',this)">📸 写真</button>
         <button class="tbtn" onclick="swTab('thist',this)">📜 履歴</button>
       </div>
-
       <div id="tr">
         <div class="sec">🏅 最終順位</div>
         <div class="rklist" id="rklist"></div>
@@ -585,12 +613,11 @@ input[type=number]{-moz-appearance:textfield;}
           <div class="cb"><div class="ct"><span>🍩</span>スコア内訳</div><canvas id="ch-do" height="175"></canvas></div>
           <div class="cb"><div class="ct"><span>📊</span>カテゴリ別比較</div><canvas id="ch-bar" height="175"></canvas></div>
         </div>
-        <div class="cb" style="margin-bottom:10px;"><div class="ct"><span>🕳️</span>ホール別平均（対パー）</div><canvas id="ch-hole" height="130"></canvas></div>
+        <div class="cb" style="margin-bottom:10px;"><div class="ct"><span>🕳️</span>ホール別平均</div><canvas id="ch-hole" height="130"></canvas></div>
         <div class="cb"><div class="ct"><span>📉</span>グロス vs ネット</div><canvas id="ch-gvn" height="155"></canvas></div>
       </div>
       <div id="trd" style="display:none;">
-        <div class="sec">🎯 プレーヤー評価レーダー</div>
-        <div style="font-size:9px;color:var(--ts);margin-bottom:10px;">パット数・OB・バンカー・FW率・リカバリーを5段階評価</div>
+        <div class="sec">🎯 プレーヤー評価</div>
         <div class="rdrow" id="rdrow"></div>
       </div>
       <div id="tgal" style="display:none;">
@@ -601,15 +628,13 @@ input[type=number]{-moz-appearance:textfield;}
         <div class="sec">📜 全コンペ履歴</div>
         <div id="hist-list"></div>
       </div>
-
       <div class="dv"></div>
-      <div class="brow"><button class="btn bgh" onclick="goPg('p2')">← スコアを編集</button></div>
+      <div class="brow"><button class="btn bgh" onclick="goPg('p2')" id="edit-score-btn">← スコアを編集</button></div>
     </div></div>
 
   </div>
 </div>
 
-<!-- MOBILE NAV -->
 <div class="mnav">
   <button class="mnb on" id="mb1" onclick="goPg('p1')"><span class="mni">📋</span>情報</button>
   <button class="mnb" id="mb2" onclick="goPg('p2')"><span class="mni">🏌️</span>スコア</button>
@@ -626,10 +651,10 @@ input[type=number]{-moz-appearance:textfield;}
     <button class="moc" onclick="closeMo('moAdd')">✕</button>
     <div class="mot">👤 参加者を追加</div>
     <div class="g2" style="margin-bottom:12px;">
-      <div class="fg"><label>氏名 <span style="color:var(--rd)">*</span></label><input type="text" id="nn" placeholder="例: 山田 太郎"><span class="em" id="e-nn">氏名を入力してください</span></div>
-      <div class="fg"><label>ハンディキャップ (0〜54)</label><input type="number" id="nh" placeholder="例: 18" min="0" max="54" inputmode="numeric"><span class="em" id="e-nh">0〜54で入力してください</span></div>
+      <div class="fg"><label>氏名 *</label><input type="text" id="nn" placeholder="例: 山田 太郎"><span class="em" id="e-nn">氏名を入力してください</span></div>
+      <div class="fg"><label>HCP (0〜54)</label><input type="number" id="nh" placeholder="18" min="0" max="54" inputmode="numeric"><span class="em" id="e-nh">0〜54で入力してください</span></div>
     </div>
-    <div class="fg" style="margin-bottom:12px;"><label>アバターカラー</label><div class="cp-row" id="cpick"></div></div>
+    <div class="fg" style="margin-bottom:12px;"><label>カラー</label><div class="cp-row" id="cpick"></div></div>
     <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(13,58,92,.3);border-radius:8px;border:1px solid var(--br);margin-bottom:14px;">
       <div class="av" id="prev-av" style="width:40px;height:40px;font-size:13px;">—</div>
       <div><div id="prev-name" style="font-size:14px;font-weight:600;">—</div><div id="prev-hcp" style="font-size:10px;color:var(--ts);">HCP —</div></div>
@@ -641,7 +666,7 @@ input[type=number]{-moz-appearance:textfield;}
   </div>
 </div>
 
-<!-- CONFIRM DELETE MODAL -->
+<!-- CONFIRM MODAL -->
 <div class="mo" id="moConf" onclick="if(event.target===this)closeMo('moConf')">
   <div class="mob">
     <div class="mob-handle"></div>
@@ -654,9 +679,9 @@ input[type=number]{-moz-appearance:textfield;}
   </div>
 </div>
 
-<!-- IMAGE VIEWER MODAL -->
+<!-- IMAGE VIEWER -->
 <div class="mo" id="moImg" onclick="closeMo('moImg')">
-  <div class="mob" style="max-width:600px;">
+  <div class="mob" style="max-width:640px;background:#000;border-radius:12px;padding:10px;">
     <div class="mob-handle"></div>
     <div id="moImg-content"></div>
     <div id="moImg-name" style="text-align:center;font-size:11px;color:var(--ts);margin-top:8px;"></div>
@@ -664,9 +689,9 @@ input[type=number]{-moz-appearance:textfield;}
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-//  CONSTANTS
-// ═══════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+//  CONFIG & STATE
+// ════════════════════════════════════════════════════
 Chart.defaults.color='#78a6c8';
 Chart.defaults.borderColor='rgba(33,150,243,0.12)';
 Chart.defaults.font.family="'Noto Sans JP',sans-serif";
@@ -675,754 +700,636 @@ const PARS=[4,5,3,4,4,5,3,4,4,4,3,5,4,4,3,5,4,4];
 const PAR_TOTAL=PARS.reduce((a,b)=>a+b,0);
 const MAX_PLAYERS=8;
 const COLORS=['#2196f3','#f5c842','#00e676','#ff5252','#ce93d8','#ff9800','#4dd0e1','#aed581'];
-const LS_KEY='golf_comp_data_v4';
+const CFG_KEY='golf_cfg_v5';
+const AUTO_SYNC_INTERVAL=30000; // 30秒ごと自動同期（メンバーモード）
 
-// ═══════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════
-let state = {
-  comps: [],        // [{id, info, players, media}]
-  currentCompId: null,
-};
-let selCol = COLORS[0];
-let pendingDelId = null;
-let pendingDelType = null; // 'player' | 'comp'
-let charts = {};
-let isDirty = false;
-let resViewCompId = null;
+let GAS_URL='';
+let MODE=''; // 'kanji' | 'member'
+let PIN='';
 
-// ═══════════════════════════════════════════════
-//  LOCALSTORAGE
-// ═══════════════════════════════════════════════
-function loadState() {
+let comps=[];           // [{comp_id, title, date, course,...}]
+let players=[];         // 現在のコンペの参加者
+let media=[];           // 現在のコンペのメディア
+let currentCompId=null;
+let resCompId=null;
+let charts={};
+let pendingDelId=null;
+let pendingDelType=null;
+let selCol=COLORS[0];
+let syncTimer=null;
+let isOnline=true;
+
+// ════════════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════════════
+window.onload=()=>{
+  // 保存済み設定を復元
   try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      state = parsed;
-      // ensure currentCompId is valid
-      if (state.comps.length > 0) {
-        if (!state.comps.find(c => c.id === state.currentCompId)) {
-          state.currentCompId = state.comps[state.comps.length - 1].id;
-        }
-      } else {
-        state.currentCompId = null;
-      }
-    }
-  } catch(e) { console.warn('Load failed', e); }
-}
-
-function persistState() {
-  try {
-    // Check size — media base64 can be large
-    const json = JSON.stringify(state);
-    const kb = Math.round(json.length / 1024);
-    localStorage.setItem(LS_KEY, json);
-    return { ok: true, kb };
-  } catch(e) {
-    // Quota exceeded — try without media data
-    console.warn('Storage full, trying without media:', e);
-    try {
-      const slim = JSON.parse(JSON.stringify(state));
-      slim.comps.forEach(c => { c.media = c.media.map(m => ({...m, data: null})); });
-      localStorage.setItem(LS_KEY, JSON.stringify(slim));
-      return { ok: true, kb: 0, warn: 'メディアデータが大きすぎたため、写真・動画の保存をスキップしました' };
-    } catch(e2) {
-      return { ok: false, error: e2.toString() };
-    }
-  }
-}
-
-// ═══════════════════════════════════════════════
-//  CURRENT COMP HELPERS
-// ═══════════════════════════════════════════════
-function currentComp() {
-  return state.comps.find(c => c.id === state.currentCompId) || null;
-}
-function currentPlayers() {
-  const c = currentComp();
-  return c ? c.players : [];
-}
-function currentMedia() {
-  const c = currentComp();
-  return c ? c.media : [];
-}
-
-// ═══════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════
-window.onload = () => {
-  loadState();
-  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+    const cfg=JSON.parse(localStorage.getItem(CFG_KEY)||'{}');
+    if(cfg.url) document.getElementById('cfg-url').value=cfg.url;
+    if(cfg.mode) selMode(cfg.mode);
+    if(cfg.pin) document.getElementById('cfg-pin').value=cfg.pin;
+  }catch(e){}
   buildCPick();
-  document.getElementById('nn').addEventListener('input', updatePreview);
-  document.getElementById('nh').addEventListener('input', updatePreview);
-
-  if (state.comps.length === 0) {
-    // 初回起動：新規コンペを自動作成
-    createNewComp();
-  } else {
-    // 既存データを復元
-    loadCurrentComp();
-  }
-  renderCompStrip();
-  renderResCompStrip();
-  updateSidebar();
-  setSaveState(false);
+  document.getElementById('nn').addEventListener('input',updatePreview);
+  document.getElementById('nh').addEventListener('input',updatePreview);
 };
 
-// ═══════════════════════════════════════════════
+function selMode(m){
+  MODE=m;
+  document.getElementById('mc-kanji').classList.toggle('sel',m==='kanji');
+  document.getElementById('mc-member').classList.toggle('sel',m==='member');
+  document.getElementById('pin-area').style.display=m==='kanji'?'block':'none';
+  document.getElementById('start-ic').textContent=m==='kanji'?'🎯':'👀';
+}
+selMode('kanji');
+
+async function startApp(){
+  const urlEl=document.getElementById('cfg-url');
+  const pinEl=document.getElementById('cfg-pin');
+  const url=urlEl.value.trim();
+  let ok=true;
+
+  document.getElementById('e-cfg-url').style.display='none';
+  urlEl.classList.remove('err');
+  if(!url||!url.startsWith('https://')){
+    urlEl.classList.add('err');document.getElementById('e-cfg-url').style.display='block';ok=false;
+  }
+  if(MODE==='kanji'){
+    const pin=pinEl.value.trim();
+    document.getElementById('e-cfg-pin').style.display='none';
+    pinEl.classList.remove('err');
+    if(!pin||pin.length<4||isNaN(Number(pin))){
+      pinEl.classList.add('err');document.getElementById('e-cfg-pin').style.display='block';ok=false;
+    } else { PIN=pin; }
+  }
+  if(!ok)return;
+
+  GAS_URL=url;
+  // 設定を保存
+  localStorage.setItem(CFG_KEY,JSON.stringify({url,mode:MODE,pin:PIN}));
+
+  // 接続テスト
+  document.getElementById('setup-screen').style.display='none';
+  showLoading('接続中...');
+  try {
+    await loadComps();
+    hideLoading();
+    applyMode();
+    if(comps.length>0){
+      currentCompId=comps[0].comp_id;
+      resCompId=currentCompId;
+      await loadCurrentComp();
+    }
+    renderCompStrips();
+    updateSidebar();
+    startAutoSync();
+    toast('✅ 接続成功しました','ok');
+  }catch(e){
+    hideLoading();
+    document.getElementById('setup-screen').style.display='flex';
+    toast('❌ 接続失敗: URLを確認してください','err');
+  }
+}
+
+function applyMode(){
+  const isKaniji=MODE==='kanji';
+  // badge
+  const b=document.getElementById('mode-badge');
+  b.className='mode-badge '+(isKaniji?'kanji':'member');
+  b.textContent=isKaniji?'🎯 幹事':'👀 メンバー';
+  // readonly banners
+  ['p1','p2','p3'].forEach(p=>{
+    const el=document.getElementById(p+'-readonly');
+    if(el)el.style.display=isKaniji?'none':'flex';
+  });
+  // save areas & add buttons
+  ['info-save-area','score-save-area'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display=isKaniji?'flex':'none';
+  });
+  const apb=document.getElementById('apb-btn');
+  if(apb)apb.style.display=isKaniji?'flex':'none';
+  const newBtn=document.getElementById('new-comp-btn');
+  if(newBtn)newBtn.style.display=isKaniji?'flex':'none';
+  const upz=document.getElementById('upz');
+  if(upz)upz.style.pointerEvents=isKaniji?'auto':'none';
+  document.getElementById('hp1').style.display=isKaniji?'flex':'none';
+  // inputs disabled for member
+  if(!isKaniji){
+    document.querySelectorAll('#p1 input,#p1 select,#p1 textarea,#p2 input,#p2 select').forEach(el=>{
+      el.disabled=true;
+    });
+  }
+  // edit score btn in results
+  const esb=document.getElementById('edit-score-btn');
+  if(esb)esb.style.display=isKaniji?'flex':'none';
+  // if member: go directly to results
+  if(!isKaniji) goPg('p4');
+}
+
+// ════════════════════════════════════════════════════
+//  GAS API
+// ════════════════════════════════════════════════════
+async function gasGet(params){
+  const qs=Object.entries(params).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join('&');
+  const res=await fetch(`${GAS_URL}?${qs}`,{method:'GET',redirect:'follow'});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  return await res.json();
+}
+async function gasPost(body){
+  const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(body),redirect:'follow'});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  return await res.json();
+}
+
+// ════════════════════════════════════════════════════
 //  COMP MANAGEMENT
-// ═══════════════════════════════════════════════
-function createNewComp() {
-  const id = 'comp_' + Date.now();
-  const num = state.comps.length + 1;
-  const comp = {
-    id,
-    info: {
-      title: `第${num}回 ゴルフコンペ`,
-      date: new Date().toISOString().split('T')[0],
-      course: '',
-      par: '71.8 / Par72',
-      weather: '☀️ 晴れ',
-      format: 'ストロークプレー（ネット）',
-      memo: '',
-    },
-    players: [],
-    media: [],
-  };
-  state.comps.push(comp);
-  state.currentCompId = id;
-  return comp;
+// ════════════════════════════════════════════════════
+async function loadComps(){
+  const r=await gasGet({action:'getComps'});
+  if(!r.ok)throw new Error(r.error);
+  comps=r.data||[];
+  setOnline(true);
 }
 
-function newComp() {
-  if (isDirty) {
-    if (!confirm('未保存の変更があります。新規コンペに切り替えますか？')) return;
-  }
-  createNewComp();
-  loadCurrentComp();
-  renderCompStrip();
-  renderResCompStrip();
-  setSaveState(true);
-  toast('✅ 新規コンペを作成しました', 'ok');
-  goPg('p1');
-}
-
-function switchComp(id) {
-  if (isDirty) {
-    if (!confirm('未保存の変更があります。保存せずに切り替えますか？')) return;
-  }
-  state.currentCompId = id;
-  resViewCompId = id;
-  loadCurrentComp();
-  renderCompStrip();
-  renderResCompStrip();
-  setSaveState(false);
-}
-
-function switchResComp(id) {
-  resViewCompId = id;
-  renderResCompStrip();
-  buildRes(true); // force rebuild
-}
-
-function deleteComp(id) {
-  const c = state.comps.find(x => x.id === id);
-  if (!c) return;
-  pendingDelType = 'comp';
-  pendingDelId = id;
-  document.getElementById('conf-ico').textContent = '🗑️';
-  document.getElementById('conf-msg').innerHTML = `<strong style="color:var(--tx)">${c.info.title}</strong> を削除しますか？<br><span style="font-size:12px;color:var(--rd);">スコア・メディアも全て削除されます</span>`;
-  document.getElementById('conf-ok').textContent = '削除する';
-  document.getElementById('conf-ok').onclick = doDelComp;
-  openMo('moConf');
-}
-
-function doDelComp() {
-  state.comps = state.comps.filter(c => c.id !== pendingDelId);
-  if (state.currentCompId === pendingDelId) {
-    state.currentCompId = state.comps.length > 0 ? state.comps[state.comps.length - 1].id : null;
-    if (!state.currentCompId) createNewComp();
-    loadCurrentComp();
-  }
-  persistState();
-  renderCompStrip();
-  renderResCompStrip();
-  closeMo('moConf');
-  toast('🗑️ コンペを削除しました', '');
-}
-
-function loadCurrentComp() {
-  const c = currentComp();
-  if (!c) return;
-  // fill form
-  const i = c.info;
-  setVal('f-title', i.title);
-  setVal('f-date', i.date);
-  setVal('f-course', i.course);
-  setVal('f-par', i.par);
-  setVal('f-weather', i.weather);
-  setVal('f-format', i.format);
-  setVal('f-memo', i.memo);
-  // players
-  renderPList();
+async function loadCurrentComp(){
+  if(!currentCompId)return;
+  // scores
+  const sr=await gasGet({action:'getScores',comp_id:currentCompId});
+  if(sr.ok) players=parsePlayersFromRows(sr.data);
   // media
+  const mr=await gasGet({action:'getMedia',comp_id:currentCompId});
+  if(mr.ok) media=mr.data||[];
+  // fill form
+  const c=comps.find(x=>x.comp_id===currentCompId);
+  if(c) fillInfoForm(c);
+  renderPList();
   renderMedia();
   updateSidebar();
-  resViewCompId = c.id;
 }
 
-function setVal(id, v) {
-  const el = document.getElementById(id);
-  if (el) el.value = v || '';
+function parsePlayersFromRows(rows){
+  return rows.map(r=>({
+    id:r.player_id||r.score_id,
+    name:r.name, init:r.init, color:r.color||COLORS[0],
+    hcp:Number(r.hcp||0),
+    holes:[r.h1,r.h2,r.h3,r.h4,r.h5,r.h6,r.h7,r.h8,r.h9,
+           r.h10,r.h11,r.h12,r.h13,r.h14,r.h15,r.h16,r.h17,r.h18]
+           .map(v=>v===''||v===null||v===undefined?'':Number(v)),
+    gross:Number(r.gross||0), net:Number(r.net||0),
+    putt:Number(r.putt||30), ob:Number(r.ob||0),
+    bunker:Number(r.bunker||2), fw:Number(r.fw||55),
+  }));
 }
 
-// ═══════════════════════════════════════════════
-//  COMP STRIP
-// ═══════════════════════════════════════════════
-function renderCompStrip() {
-  const strip = document.getElementById('comp-strip');
-  if (!strip) return;
-  strip.innerHTML = state.comps.map(c =>
-    `<div class="comp-chip ${c.id === state.currentCompId ? 'on' : ''}" onclick="switchComp('${c.id}')">
-      <span>⛳</span>${c.info.title || '（未設定）'}
-    </div>`
-  ).join('');
+function fillInfoForm(c){
+  setVal('f-title',c.title);setVal('f-date',c.date);setVal('f-course',c.course);
+  setVal('f-par',c.par);setVal('f-weather',c.weather);setVal('f-format',c.format);setVal('f-memo',c.memo);
 }
+function setVal(id,v){const e=document.getElementById(id);if(e)e.value=v||'';}
 
-function renderResCompStrip() {
-  const strip = document.getElementById('res-comp-strip');
-  if (!strip) return;
-  const vid = resViewCompId || state.currentCompId;
-  strip.innerHTML = state.comps.map(c =>
-    `<div class="comp-chip ${c.id === vid ? 'on' : ''}" onclick="switchResComp('${c.id}')">
-      ⛳ ${c.info.title || '（未設定）'}
-    </div>`
-  ).join('');
-}
-
-// ═══════════════════════════════════════════════
-//  SAVE / DIRTY
-// ═══════════════════════════════════════════════
-function markDirty() {
-  isDirty = true;
-  setSaveState(true);
-}
-
-function setSaveState(dirty) {
-  isDirty = dirty;
-  const el = document.getElementById('sb-savest');
-  if (el) {
-    el.className = 'save-st ' + (dirty ? 'unsaved' : 'saved');
-    el.textContent = dirty ? '● 未保存' : '✅ 保存済み';
-  }
-}
-
-function showBanner() {
-  document.getElementById('saveBanner').classList.add('show');
-}
-function hideBanner() {
-  document.getElementById('saveBanner').classList.remove('show');
-}
-
-function saveInfoOnly() {
-  const c = currentComp();
-  if (!c) return;
-  c.info.title   = document.getElementById('f-title').value.trim();
-  c.info.date    = document.getElementById('f-date').value;
-  c.info.course  = document.getElementById('f-course').value.trim();
-  c.info.par     = document.getElementById('f-par').value;
-  c.info.weather = document.getElementById('f-weather').value;
-  c.info.format  = document.getElementById('f-format').value;
-  c.info.memo    = document.getElementById('f-memo').value;
-}
-
-function saveAll() {
-  // collect info
-  saveInfoOnly();
-  // persist
-  const result = persistState();
-  if (result.ok) {
-    setSaveState(false);
-    hideBanner();
-    renderCompStrip();
-    renderResCompStrip();
-    updateSidebar();
-    const msg = result.warn ? `⚠️ ${result.warn}` : `✅ 保存しました`;
-    const type = result.warn ? 'err' : 'ok';
-    toast(msg, type);
-    // update save status labels
-    const now = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'});
-    ['info-save-st','score-save-st','media-save-st'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.textContent = `✅ ${now} 保存済み`; el.style.color = 'var(--gr)'; }
+async function newComp(){
+  showLoading('新規コンペを作成中...');
+  try{
+    const num=comps.length+1;
+    const r=await gasPost({
+      action:'saveComp',
+      title:`第${num}回 ゴルフコンペ`,
+      date:new Date().toISOString().split('T')[0],
+      course:'',par:'71.8 / Par72',weather:'☀️ 晴れ',format:'ストロークプレー（ネット）',memo:''
     });
-  } else {
-    toast('❌ 保存に失敗しました: ' + result.error, 'err');
-  }
+    if(!r.ok)throw new Error(r.error);
+    currentCompId=r.comp_id;
+    players=[];media=[];
+    await loadComps();
+    fillInfoForm(comps.find(x=>x.comp_id===currentCompId)||{});
+    renderPList();renderMedia();renderCompStrips();updateSidebar();
+    hideLoading();toast('✅ 新規コンペを作成しました','ok');
+    goPg('p1');
+  }catch(e){hideLoading();toast('❌ 作成失敗: '+e.message,'err');}
 }
 
-function saveInfoAndNext() {
-  // validate
-  let ok = true;
-  const checks = [
-    ['f-title','e-title','大会名を入力してください'],
-    ['f-date','e-date','開催日を選択してください'],
-    ['f-course','e-course','コース名を入力してください'],
-  ];
-  checks.forEach(([fid,eid,msg]) => {
-    const el = document.getElementById(fid);
-    const em = document.getElementById(eid);
-    if (!el.value.trim()) {
-      el.classList.add('err'); em.style.display='block'; ok=false;
-    } else {
-      el.classList.remove('err'); em.style.display='none';
-    }
-  });
-  if (!ok) { toast('⚠️ 必須項目を入力してください', 'err'); return; }
-  saveAll();
-  markStep(1, true);
-  goPg('p2');
+async function switchComp(id){
+  currentCompId=id;resCompId=id;
+  showLoading('データを読み込み中...');
+  try{
+    await loadCurrentComp();
+    renderCompStrips();
+    hideLoading();
+    setSyncTime();
+  }catch(e){hideLoading();toast('❌ 読み込み失敗','err');}
+}
+async function switchResComp(id){
+  resCompId=id;
+  showLoading('データを読み込み中...');
+  try{
+    const sr=await gasGet({action:'getScores',comp_id:id});
+    const mr=await gasGet({action:'getMedia',comp_id:id});
+    const c=comps.find(x=>x.comp_id===id)||{};
+    renderResCompStrip();
+    buildRes(c,sr.ok?parsePlayersFromRows(sr.data):[],mr.ok?mr.data:[]);
+    hideLoading();
+  }catch(e){hideLoading();toast('❌ 読み込み失敗','err');}
 }
 
-// ═══════════════════════════════════════════════
-//  PAGE NAV
-// ═══════════════════════════════════════════════
-const PGS=['p1','p2','p3','p4'];
-const SBS=['s1','s2','s3','s4'];
-const MBS=['mb1','mb2','mb3','mb4'];
-const HPS=['hp1','hp2',null,'hp4'];
+async function saveInfoAndNext(){
+  const title=document.getElementById('f-title').value.trim();
+  const course=document.getElementById('f-course').value.trim();
+  let ok=true;
+  if(!title){document.getElementById('f-title').classList.add('err');document.getElementById('e-title').style.display='block';ok=false;}
+  else{document.getElementById('f-title').classList.remove('err');document.getElementById('e-title').style.display='none';}
+  if(!course){document.getElementById('f-course').classList.add('err');document.getElementById('e-course').style.display='block';ok=false;}
+  else{document.getElementById('f-course').classList.remove('err');document.getElementById('e-course').style.display='none';}
+  if(!ok){toast('⚠️ 必須項目を入力してください','warn');return;}
 
-function goPg(id) {
-  PGS.forEach(p => document.getElementById(p).classList.remove('on'));
-  SBS.forEach(s => document.getElementById(s).classList.remove('on'));
-  MBS.forEach(m => document.getElementById(m).classList.remove('on'));
-  HPS.forEach(h => { if(h) document.getElementById(h).classList.remove('on'); });
-  document.getElementById(id).classList.add('on');
-  const i = PGS.indexOf(id);
-  if (i >= 0) {
-    document.getElementById(SBS[i]).classList.add('on');
-    document.getElementById(MBS[i]).classList.add('on');
-    if (HPS[i]) document.getElementById(HPS[i]).classList.add('on');
-  }
-  document.getElementById('cnt').scrollTop = 0;
-  if (id === 'p4') { resViewCompId = resViewCompId || state.currentCompId; buildRes(false); }
-  // Show save banner if dirty and leaving input pages
-  if (isDirty && id === 'p4') showBanner();
+  const btn=document.querySelector('#info-save-area .btn-save');
+  btn.disabled=true;btn.textContent='保存中...';
+  try{
+    const r=await gasPost({
+      action:'saveComp',comp_id:currentCompId,
+      title,date:document.getElementById('f-date').value,
+      course,par:document.getElementById('f-par').value,
+      weather:document.getElementById('f-weather').value,
+      format:document.getElementById('f-format').value,
+      memo:document.getElementById('f-memo').value,
+    });
+    if(!r.ok)throw new Error(r.error);
+    currentCompId=r.comp_id;
+    await loadComps();
+    renderCompStrips();
+    const now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('info-save-st').textContent=`✅ ${now} 保存済み`;
+    document.getElementById('info-save-st').style.color='var(--gr)';
+    markStep(1,true);
+    toast('✅ 大会情報をスプレッドシートに保存しました','ok');
+    goPg('p2');
+  }catch(e){toast('❌ 保存失敗: '+e.message,'err');}
+  finally{btn.disabled=false;btn.textContent='💾 保存してスコア入力へ →';}
 }
 
-function markStep(n, done) {
-  document.getElementById('d'+n).style.background = done ? 'var(--gr)' : '';
-  document.getElementById('s'+n).classList.toggle('done', done);
+async function saveScores(){
+  if(!currentCompId){toast('⚠️ まず大会情報を保存してください','warn');return;}
+  const btn=document.querySelector('#score-save-area .btn-save');
+  btn.disabled=true;btn.textContent='保存中...';
+  try{
+    const r=await gasPost({action:'saveScores',comp_id:currentCompId,players});
+    if(!r.ok)throw new Error(r.error);
+    const now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('score-save-st').textContent=`✅ ${now} 保存済み - メンバーに反映されました`;
+    document.getElementById('score-save-st').style.color='var(--gr)';
+    markStep(2,true);
+    toast('✅ スコアをスプレッドシートに保存しました','ok');
+  }catch(e){toast('❌ 保存失敗: '+e.message,'err');}
+  finally{btn.disabled=false;btn.textContent='💾 スコアを保存';}
 }
 
-function goRes() {
-  if (!currentPlayers().length) { toast('⚠️ 参加者を追加してください', 'err'); return; }
-  resViewCompId = state.currentCompId;
-  buildRes(true);
-  goPg('p4');
-}
-
-// ═══════════════════════════════════════════════
-//  SIDEBAR
-// ═══════════════════════════════════════════════
-function updateSidebar() {
-  const c = currentComp();
-  document.getElementById('sb-comp').textContent = c ? (c.info.title || '（未設定）') : '—';
-  document.getElementById('sbm').textContent = currentPlayers().length + '名';
-  const done = currentPlayers().filter(p => p.holes.filter(v=>v!=='').length===18).length;
-  const total = currentPlayers().length;
-  document.getElementById('all-status').textContent =
-    total === 0 ? '—' : done === total ? '全員完了 ✅' : `${done}/${total}名完了`;
-  document.getElementById('pcnt').textContent = total + '名';
-  const hint = document.getElementById('apb-hint');
-  if (hint) {
-    hint.textContent = total >= MAX_PLAYERS ? '上限に達しました' : `残り${MAX_PLAYERS-total}名`;
-    hint.style.color = total >= MAX_PLAYERS ? 'var(--rd)' : 'var(--ts)';
-  }
-  const mc = currentMedia().length;
-  const mcount = document.getElementById('media-count');
-  if (mcount) mcount.textContent = mc > 0 ? `(${mc}件)` : '';
-}
-
-// ═══════════════════════════════════════════════
-//  ADD PLAYER
-// ═══════════════════════════════════════════════
-function buildCPick() {
-  document.getElementById('cpick').innerHTML = COLORS.map(c =>
-    `<div class="cp-dot" id="cp${c.slice(1)}" style="background:${c}" onclick="selClr('${c}')"></div>`
-  ).join('');
-  hiClr(COLORS[0]);
-}
-function selClr(c) { selCol=c; hiClr(c); updatePreview(); }
-function hiClr(c) { COLORS.forEach(cl => { const e=document.getElementById('cp'+cl.slice(1)); if(e)e.classList.toggle('sel',cl===c); }); }
-function getInits(n) { const p=n.trim().split(/\s+/); return p.length>=2?p[0][0]+p[1][0]:n.trim().slice(0,2).toUpperCase(); }
-function updatePreview() {
-  const name = document.getElementById('nn').value.trim();
-  const hcp  = document.getElementById('nh').value;
-  const av = document.getElementById('prev-av');
-  av.textContent = name ? getInits(name) : '—';
-  av.style.color = selCol; av.style.borderColor = selCol;
-  document.getElementById('prev-name').textContent = name || '—';
-  document.getElementById('prev-hcp').textContent = 'HCP ' + (hcp || '—');
-}
-
-function openAddMo() {
-  if (currentPlayers().length >= MAX_PLAYERS) { toast(`⚠️ 参加者は最大${MAX_PLAYERS}名です`, 'err'); return; }
-  const c = COLORS[currentPlayers().length % COLORS.length];
-  selClr(c);
-  ['nn','nh'].forEach(id => { document.getElementById(id).value=''; document.getElementById(id).classList.remove('err'); });
-  ['e-nn','e-nh'].forEach(id => document.getElementById(id).style.display='none');
-  updatePreview();
-  openMo('moAdd');
-  setTimeout(() => document.getElementById('nn').focus(), 200);
-}
-
-function doAdd() {
-  const nn = document.getElementById('nn');
-  const nh = document.getElementById('nh');
-  const name = nn.value.trim();
-  const hcp  = parseInt(nh.value);
-  let ok = true;
-  if (!name) { nn.classList.add('err'); document.getElementById('e-nn').style.display='block'; ok=false; } else { nn.classList.remove('err'); document.getElementById('e-nn').style.display='none'; }
-  if (nh.value===''||isNaN(hcp)||hcp<0||hcp>54) { nh.classList.add('err'); document.getElementById('e-nh').style.display='block'; ok=false; } else { nh.classList.remove('err'); document.getElementById('e-nh').style.display='none'; }
-  if (!ok) { toast('⚠️ 入力を確認してください', 'err'); return; }
-  const c = currentComp();
-  if (!c) return;
-  c.players.push({
-    id: Date.now(),
-    name, init: getInits(name), color: selCol, hcp,
-    holes: Array(18).fill(''),
-    putt: Math.floor(Math.random()*8)+27,
-    ob: Math.floor(Math.random()*3),
-    bunker: Math.floor(Math.random()*5)+1,
-    fw: Math.floor(Math.random()*30)+45,
-  });
-  markDirty();
-  renderPList();
-  updateSidebar();
-  closeMo('moAdd');
-  toast(`✅ ${name} を追加しました`, 'ok');
-  setTimeout(() => {
-    const last = c.players[c.players.length-1];
-    const row = document.getElementById('pr'+last.id);
-    if (row) row.classList.add('open');
-    document.getElementById('cnt').scrollTo({top:9999,behavior:'smooth'});
-  }, 200);
-}
-
-// ═══════════════════════════════════════════════
-//  DELETE PLAYER
-// ═══════════════════════════════════════════════
-function askDelPlayer(id) {
-  const p = currentPlayers().find(x => x.id === id);
-  if (!p) return;
-  pendingDelType = 'player';
-  pendingDelId = id;
-  document.getElementById('conf-ico').textContent = '🗑️';
-  document.getElementById('conf-msg').innerHTML = `<strong style="color:var(--tx)">${p.name}</strong> を削除しますか？<br><span style="font-size:12px;">入力したスコアも削除されます。</span>`;
-  document.getElementById('conf-ok').textContent = '削除する';
-  document.getElementById('conf-ok').onclick = doDelPlayer;
+async function deleteComp(id){
+  const c=comps.find(x=>x.comp_id===id);
+  if(!c)return;
+  pendingDelType='comp';pendingDelId=id;
+  document.getElementById('conf-ico').textContent='🗑️';
+  document.getElementById('conf-msg').innerHTML=`<strong>${c.title||'（未設定）'}</strong> を削除しますか？<br><small style="color:var(--rd)">スコア・写真も全て削除されます</small>`;
+  document.getElementById('conf-ok').onclick=doDelComp;
   openMo('moConf');
 }
-function doDelPlayer() {
-  const c = currentComp();
-  if (!c) return;
-  c.players = c.players.filter(p => p.id !== pendingDelId);
-  markDirty();
-  renderPList();
-  updateSidebar();
+async function doDelComp(){
   closeMo('moConf');
-  toast('🗑️ 参加者を削除しました', '');
+  showLoading('削除中...');
+  try{
+    await gasPost({action:'deleteComp',comp_id:pendingDelId});
+    await loadComps();
+    if(currentCompId===pendingDelId){
+      currentCompId=comps.length>0?comps[0].comp_id:null;
+      players=[];media=[];
+      if(currentCompId)await loadCurrentComp();
+      else{renderPList();renderMedia();}
+    }
+    renderCompStrips();
+    hideLoading();toast('🗑️ コンペを削除しました','');
+  }catch(e){hideLoading();toast('❌ 削除失敗','err');}
 }
 
-// ═══════════════════════════════════════════════
-//  RENDER PLAYERS
-// ═══════════════════════════════════════════════
-function renderPList() {
-  const players = currentPlayers();
-  const w = document.getElementById('plist');
-  if (!players.length) {
-    w.innerHTML='<div style="text-align:center;color:var(--ts);font-size:13px;padding:20px;">＋ 参加者を追加してください</div>';
-    return;
+// ════════════════════════════════════════════════════
+//  AUTO SYNC
+// ════════════════════════════════════════════════════
+function startAutoSync(){
+  if(syncTimer)clearInterval(syncTimer);
+  // メンバーモードは自動同期、幹事モードは手動のみ
+  if(MODE==='member'){
+    syncTimer=setInterval(syncAll,AUTO_SYNC_INTERVAL);
   }
-  w.innerHTML = players.map(p => {
-    const g = calcGross(p), net = g>0?g-p.hcp:0;
-    const fc = p.holes.filter(v=>v!=='').length;
-    const stCls = fc===18?'vb-ok':fc>0?'vb-wip':'vb-ng';
-    const stTxt = fc===18?'✅ 完了':fc>0?`${fc}/18H`:'未入力';
-    return `
-    <div class="pcard" id="pr${p.id}">
+}
+
+async function syncAll(){
+  const btn=document.getElementById('sync-btn');
+  btn.classList.add('spinning');
+  try{
+    await loadComps();
+    if(currentCompId) await loadCurrentComp();
+    renderCompStrips();
+    updateSidebar();
+    setSyncTime();
+    setOnline(true);
+    // if on result page, refresh
+    if(document.getElementById('p4').classList.contains('on')){
+      const c=comps.find(x=>x.comp_id===(resCompId||currentCompId))||{};
+      buildRes(c,players,media);
+    }
+  }catch(e){
+    setOnline(false);
+  }finally{
+    btn.classList.remove('spinning');
+  }
+}
+
+function setOnline(v){
+  isOnline=v;
+  const p=document.getElementById('conn-pulse');
+  if(p){p.className='pulse'+(v?'':' offline');}
+  const st=document.getElementById('sb-sync');
+  if(st){st.className='sync-st '+(v?'ok':'err');if(!v)st.textContent='● オフライン';}
+}
+function setSyncTime(){
+  const st=document.getElementById('sb-sync');
+  if(st){
+    const now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    st.className='sync-st ok';st.textContent=`✅ ${now} 同期済み`;
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  COMP STRIPS
+// ════════════════════════════════════════════════════
+function renderCompStrips(){
+  renderCompStrip();renderResCompStrip();
+}
+function renderCompStrip(){
+  const s=document.getElementById('comp-strip');if(!s)return;
+  s.innerHTML=comps.map(c=>`<div class="comp-chip ${c.comp_id===currentCompId?'on':''}" onclick="switchComp('${c.comp_id}')">⛳ ${c.title||'（未設定）'}</div>`).join('');
+}
+function renderResCompStrip(){
+  const s=document.getElementById('res-comp-strip');if(!s)return;
+  const vid=resCompId||currentCompId;
+  s.innerHTML=comps.map(c=>`<div class="comp-chip ${c.comp_id===vid?'on':''}" onclick="switchResComp('${c.comp_id}')">⛳ ${c.title||'（未設定）'}</div>`).join('');
+}
+
+// ════════════════════════════════════════════════════
+//  PLAYERS
+// ════════════════════════════════════════════════════
+function buildCPick(){
+  document.getElementById('cpick').innerHTML=COLORS.map(c=>`<div class="cp-dot" id="cp${c.slice(1)}" style="background:${c}" onclick="selClr('${c}')"></div>`).join('');
+  hiClr(COLORS[0]);
+}
+function selClr(c){selCol=c;hiClr(c);updatePreview();}
+function hiClr(c){COLORS.forEach(cl=>{const e=document.getElementById('cp'+cl.slice(1));if(e)e.classList.toggle('sel',cl===c);});}
+function getInits(n){const p=n.trim().split(/\s+/);return p.length>=2?p[0][0]+p[1][0]:n.trim().slice(0,2).toUpperCase();}
+function updatePreview(){
+  const name=document.getElementById('nn').value.trim();
+  const hcp=document.getElementById('nh').value;
+  const av=document.getElementById('prev-av');
+  av.textContent=name?getInits(name):'—';av.style.color=selCol;av.style.borderColor=selCol;
+  document.getElementById('prev-name').textContent=name||'—';
+  document.getElementById('prev-hcp').textContent='HCP '+(hcp||'—');
+}
+
+function openAddMo(){
+  if(players.length>=MAX_PLAYERS){toast(`⚠️ 最大${MAX_PLAYERS}名です`,'warn');return;}
+  selClr(COLORS[players.length%COLORS.length]);
+  ['nn','nh'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('err');});
+  ['e-nn','e-nh'].forEach(id=>document.getElementById(id).style.display='none');
+  updatePreview();openMo('moAdd');
+  setTimeout(()=>document.getElementById('nn').focus(),200);
+}
+function doAdd(){
+  const nn=document.getElementById('nn'),nh=document.getElementById('nh');
+  const name=nn.value.trim(),hcp=parseInt(nh.value);
+  let ok=true;
+  if(!name){nn.classList.add('err');document.getElementById('e-nn').style.display='block';ok=false;}else{nn.classList.remove('err');document.getElementById('e-nn').style.display='none';}
+  if(nh.value===''||isNaN(hcp)||hcp<0||hcp>54){nh.classList.add('err');document.getElementById('e-nh').style.display='block';ok=false;}else{nh.classList.remove('err');document.getElementById('e-nh').style.display='none';}
+  if(!ok){toast('⚠️ 入力を確認してください','warn');return;}
+  players.push({id:Date.now(),name,init:getInits(name),color:selCol,hcp,holes:Array(18).fill(''),putt:Math.floor(Math.random()*8)+27,ob:Math.floor(Math.random()*3),bunker:Math.floor(Math.random()*5)+1,fw:Math.floor(Math.random()*30)+45});
+  renderPList();updateSidebar();closeMo('moAdd');
+  toast(`✅ ${name} を追加しました`,'ok');
+  setTimeout(()=>{const last=players[players.length-1];const row=document.getElementById('pr'+last.id);if(row)row.classList.add('open');document.getElementById('cnt').scrollTo({top:9999,behavior:'smooth'});},200);
+}
+
+function askDelPlayer(id){
+  const p=players.find(x=>x.id===id);if(!p)return;
+  pendingDelType='player';pendingDelId=id;
+  document.getElementById('conf-ico').textContent='🗑️';
+  document.getElementById('conf-msg').innerHTML=`<strong>${p.name}</strong> を削除しますか？<br><small>入力したスコアも削除されます。</small>`;
+  document.getElementById('conf-ok').textContent='削除する';
+  document.getElementById('conf-ok').onclick=()=>{players=players.filter(x=>x.id!==pendingDelId);renderPList();updateSidebar();closeMo('moConf');toast('🗑️ 削除しました','');};
+  openMo('moConf');
+}
+
+function renderPList(){
+  const w=document.getElementById('plist');
+  document.getElementById('pcnt').textContent=players.length+'名';
+  const hint=document.getElementById('apb-hint');
+  if(hint){hint.textContent=players.length>=MAX_PLAYERS?'上限に達しました':`残り${MAX_PLAYERS-players.length}名`;hint.style.color=players.length>=MAX_PLAYERS?'var(--rd)':'var(--ts)';}
+  if(!players.length){w.innerHTML='<div style="text-align:center;color:var(--ts);font-size:13px;padding:20px;">参加者を追加してください</div>';return;}
+  const ro=MODE==='member';
+  w.innerHTML=players.map(p=>{
+    const g=calcGross(p),net=g>0?g-p.hcp:0,fc=p.holes.filter(v=>v!=='').length;
+    return`<div class="pcard" id="pr${p.id}">
       <div class="pcard-head" onclick="togP(${p.id})">
         <div class="av" style="color:${p.color};border-color:${p.color};">${p.init}</div>
-        <div style="flex:1;min-width:0;">
-          <div class="pname">${p.name}</div>
-          <div class="phcp">HCP ${p.hcp}</div>
-        </div>
-        <div style="text-align:right;margin-right:8px;">
-          ${g>0?`<div class="pgross">${g}</div><div style="font-size:9px;color:var(--ts);">NET ${net}</div>`:`<span class="vbadge-inline ${stCls}">${stTxt}</span>`}
-        </div>
+        <div style="flex:1;min-width:0;"><div class="pname">${p.name}</div><div class="phcp">HCP ${p.hcp}</div></div>
+        <div style="text-align:right;margin-right:8px;">${g>0?`<div style="font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--bg2);">${g}</div><div style="font-size:9px;color:var(--ts);">NET ${net}</div>`:`<span style="font-size:10px;color:var(--ts);">${fc>0?fc+'/18H':'未入力'}</span>`}</div>
         <div class="pchev">›</div>
       </div>
       <div class="pbody">
         <div class="sc-section"><div class="sc-section-lbl">OUT</div><div class="sc-section-line"></div><div class="sc-section-tot" id="out${p.id}" style="color:var(--bb);">—</div></div>
-        <div class="sc-grid">${[0,1,2,3,4,5,6,7,8].map(i=>`
-          <div class="sc-cell">
-            <div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div>
-            <input class="sc-inp" type="number" min="1" max="15" inputmode="numeric"
-              id="h${p.id}_${i}" value="${p.holes[i]||''}"
-              onchange="onH(${p.id},${i},this.value)"
-              oninput="clrH(this,${PARS[i]})" onfocus="this.select()">
-            <div class="sc-pm">
-              <div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div>
-              <div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>
-            </div>
-          </div>`).join('')}
-        </div>
+        <div class="sc-grid">${[0,1,2,3,4,5,6,7,8].map(i=>`<div class="sc-cell"><div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div><input class="sc-inp" type="number" min="1" max="15" inputmode="numeric" id="h${p.id}_${i}" value="${p.holes[i]||''}" ${ro?'disabled':''} onchange="onH(${p.id},${i},this.value)" oninput="clrH(this,${PARS[i]})" onfocus="this.select()"><div class="sc-pm">${ro?'':`<div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div><div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>`}</div></div>`).join('')}</div>
         <div class="sc-section" style="margin-top:10px;"><div class="sc-section-lbl">IN</div><div class="sc-section-line"></div><div class="sc-section-tot" id="in${p.id}" style="color:var(--bb);">—</div></div>
-        <div class="sc-grid">${[9,10,11,12,13,14,15,16,17].map(i=>`
-          <div class="sc-cell">
-            <div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div>
-            <input class="sc-inp" type="number" min="1" max="15" inputmode="numeric"
-              id="h${p.id}_${i}" value="${p.holes[i]||''}"
-              onchange="onH(${p.id},${i},this.value)"
-              oninput="clrH(this,${PARS[i]})" onfocus="this.select()">
-            <div class="sc-pm">
-              <div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div>
-              <div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>
-            </div>
-          </div>`).join('')}
-        </div>
+        <div class="sc-grid">${[9,10,11,12,13,14,15,16,17].map(i=>`<div class="sc-cell"><div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div><input class="sc-inp" type="number" min="1" max="15" inputmode="numeric" id="h${p.id}_${i}" value="${p.holes[i]||''}" ${ro?'disabled':''} onchange="onH(${p.id},${i},this.value)" oninput="clrH(this,${PARS[i]})" onfocus="this.select()"><div class="sc-pm">${ro?'':`<div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div><div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>`}</div></div>`).join('')}</div>
         <div class="mst">
           <div class="ms"><div class="mv" id="mg${p.id}">—</div><div class="ml">グロス</div></div>
           <div class="ms"><div class="mv" id="mn${p.id}">—</div><div class="ml">ネット</div></div>
           <div class="ms"><div class="mv" id="md${p.id}">—</div><div class="ml">対パー</div></div>
-          <div class="ms"><div class="mv" id="mv${p.id}" style="font-size:10px;color:var(--ts);">${stTxt}</div><div class="ml">状況</div></div>
+          <div class="ms"><div class="mv" id="mv${p.id}" style="font-size:10px;color:var(--ts);">${fc===18?'✅完了':fc+'/18H'}</div><div class="ml">状況</div></div>
         </div>
-        <div class="dv"></div>
-        <div style="font-size:9px;color:var(--ts);margin-bottom:8px;">▸ 追加スタッツ</div>
+        ${ro?'':`<div class="dv"></div>
         <div class="xst-grid">
-          <div>
-            <div class="xst-row"><span class="xst-label">🏌️ パット数</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'putt',-1)">−</div><div class="xst-val" id="xp${p.id}">${p.putt}</div><div class="xst-btn" onclick="adjSt(${p.id},'putt',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:3px;">回</span></div></div>
-            <div class="xst-row"><span class="xst-label">⚠️ OB数</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'ob',-1)">−</div><div class="xst-val" id="xo${p.id}">${p.ob}</div><div class="xst-btn" onclick="adjSt(${p.id},'ob',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:3px;">回</span></div></div>
-          </div>
-          <div>
-            <div class="xst-row"><span class="xst-label">🏖️ バンカー</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'bunker',-1)">−</div><div class="xst-val" id="xb${p.id}">${p.bunker}</div><div class="xst-btn" onclick="adjSt(${p.id},'bunker',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:3px;">回</span></div></div>
-            <div class="xst-row"><span class="xst-label">🌿 FW率</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'fw',-5)">−</div><div class="xst-val" id="xf${p.id}">${p.fw}</div><div class="xst-btn" onclick="adjSt(${p.id},'fw',+5)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:3px;">%</span></div></div>
-          </div>
+          <div><div class="xst-row"><span class="xst-label">🏌️ パット</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'putt',-1)">−</div><div class="xst-val" id="xp${p.id}">${p.putt}</div><div class="xst-btn" onclick="adjSt(${p.id},'putt',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div>
+          <div class="xst-row"><span class="xst-label">⚠️ OB</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'ob',-1)">−</div><div class="xst-val" id="xo${p.id}">${p.ob}</div><div class="xst-btn" onclick="adjSt(${p.id},'ob',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div></div>
+          <div><div class="xst-row"><span class="xst-label">🏖️ バンカー</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'bunker',-1)">−</div><div class="xst-val" id="xb${p.id}">${p.bunker}</div><div class="xst-btn" onclick="adjSt(${p.id},'bunker',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div>
+          <div class="xst-row"><span class="xst-label">🌿 FW率</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'fw',-5)">−</div><div class="xst-val" id="xf${p.id}">${p.fw}</div><div class="xst-btn" onclick="adjSt(${p.id},'fw',+5)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">%</span></div></div></div>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px;">
           <button class="btn bdn" onclick="askDelPlayer(${p.id})">🗑️ 削除</button>
-        </div>
+        </div>`}
       </div>
     </div>`;
   }).join('');
-  // reapply hole colors & recalc
-  players.forEach(p => {
-    p.holes.forEach((v,i)=>{ if(v!==''){const e=document.getElementById(`h${p.id}_${i}`);if(e)clrH(e,PARS[i]);} });
-    recalc(p.id);
-  });
+  players.forEach(p=>{p.holes.forEach((v,i)=>{if(v!==''){const e=document.getElementById(`h${p.id}_${i}`);if(e)clrH(e,PARS[i]);}});recalc(p.id);});
 }
 
-function togP(id) { document.getElementById('pr'+id).classList.toggle('open'); }
+function togP(id){document.getElementById('pr'+id).classList.toggle('open');}
 
-// ═══════════════════════════════════════════════
-//  SCORE INPUT
-// ═══════════════════════════════════════════════
-function clrH(inp, par) {
-  const v = parseInt(inp.value);
-  inp.className = 'sc-inp';
-  if (!v||isNaN(v)) return;
-  if (v<1||v>15) { inp.classList.add('err-val'); return; }
-  if (v<=par-2) inp.classList.add('eagle');
-  else if (v===par-1) inp.classList.add('birdie');
-  else if (v===par+1) inp.classList.add('bogey');
-  else if (v>=par+2) inp.classList.add('dbogey');
+// ════════════════════════════════════════════════════
+//  SCORE
+// ════════════════════════════════════════════════════
+function clrH(inp,par){
+  const v=parseInt(inp.value);inp.className='sc-inp';
+  if(!v||isNaN(v))return;
+  if(v<1||v>15){inp.classList.add('err-val');return;}
+  if(v<=par-2)inp.classList.add('eagle');
+  else if(v===par-1)inp.classList.add('birdie');
+  else if(v===par+1)inp.classList.add('bogey');
+  else if(v>=par+2)inp.classList.add('dbogey');
 }
-
-function onH(pid, hi, val) {
-  const p = currentPlayers().find(x=>x.id===pid); if(!p) return;
-  const v = val===''?'':(parseInt(val)||'');
-  if (v!==''&&(v<1||v>15)) {
-    const inp = document.getElementById(`h${pid}_${hi}`);
-    if(inp){inp.classList.add('err-val');inp.value='';}
-    toast('⚠️ スコアは1〜15で入力してください', 'err');
-    p.holes[hi]='';
-  } else { p.holes[hi]=v; }
-  recalc(pid); markDirty(); updateSidebar();
+function onH(pid,hi,val){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  const v=val===''?'':(parseInt(val)||'');
+  if(v!==''&&(v<1||v>15)){const e=document.getElementById(`h${pid}_${hi}`);if(e){e.classList.add('err-val');e.value='';}toast('⚠️ スコアは1〜15で入力してください','warn');p.holes[hi]='';}
+  else p.holes[hi]=v;
+  recalc(pid);
 }
-
-function adjH(pid, hi, delta) {
-  const p = currentPlayers().find(x=>x.id===pid); if(!p) return;
-  const cur = p.holes[hi]===''?PARS[hi]:Number(p.holes[hi]);
-  const nv = Math.max(1,Math.min(15,cur+delta));
-  p.holes[hi]=nv;
-  const inp = document.getElementById(`h${pid}_${hi}`);
-  if(inp){inp.value=nv;clrH(inp,PARS[hi]);}
-  recalc(pid); markDirty(); updateSidebar();
+function adjH(pid,hi,d){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  const cur=p.holes[hi]===''?PARS[hi]:Number(p.holes[hi]);
+  const nv=Math.max(1,Math.min(15,cur+d));
+  p.holes[hi]=nv;const e=document.getElementById(`h${pid}_${hi}`);if(e){e.value=nv;clrH(e,PARS[hi]);}
+  recalc(pid);
 }
-
-function adjSt(pid, key, delta) {
-  const p = currentPlayers().find(x=>x.id===pid); if(!p) return;
-  const lim = {putt:[18,60],ob:[0,20],bunker:[0,20],fw:[0,100]};
-  const [mn,mx]=lim[key];
-  p[key]=Math.max(mn,Math.min(mx,(p[key]||0)+delta));
-  const pm = {putt:'xp',ob:'xo',bunker:'xb',fw:'xf'};
-  const el = document.getElementById(pm[key]+pid);
-  if(el) el.textContent=p[key];
-  markDirty();
+function adjSt(pid,key,d){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  const lim={putt:[18,60],ob:[0,20],bunker:[0,20],fw:[0,100]};
+  const[mn,mx]=lim[key];p[key]=Math.max(mn,Math.min(mx,(p[key]||0)+d));
+  const pm={putt:'xp',ob:'xo',bunker:'xb',fw:'xf'};
+  const e=document.getElementById(pm[key]+pid);if(e)e.textContent=p[key];
 }
-
-function calcGross(p) {
-  return p.holes.filter(v=>v!==''&&Number(v)>0).reduce((a,b)=>a+Number(b),0);
-}
-
-function recalc(pid) {
-  const p = currentPlayers().find(x=>x.id===pid); if(!p) return;
+function calcGross(p){return p.holes.filter(v=>v!==''&&Number(v)>0).reduce((a,b)=>a+Number(b),0);}
+function recalc(pid){
+  const p=players.find(x=>x.id===pid);if(!p)return;
   const out=[0,1,2,3,4,5,6,7,8].reduce((a,i)=>a+(Number(p.holes[i])||0),0);
   const ins=[9,10,11,12,13,14,15,16,17].reduce((a,i)=>a+(Number(p.holes[i])||0),0);
-  const g=out+ins; const fc=p.holes.filter(v=>v!=='').length;
-  p.gross=g; p.net=g>0?g-p.hcp:0;
+  const g=out+ins;const fc=p.holes.filter(v=>v!=='').length;
+  p.gross=g;p.net=g>0?g-p.hcp:0;
+  const setH=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  const setHTML=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
-  setHTML('out'+pid,`${out||'—'}<span style="font-size:9px;color:var(--ts);"> /36</span>`);
-  setHTML('in'+pid, `${ins||'—'}<span style="font-size:9px;color:var(--ts);"> /36</span>`);
-  set('mg'+pid, g||'—'); set('mn'+pid, g>0?p.net:'—');
-  const diff=g-PAR_TOTAL;
-  set('md'+pid, g>0?(diff>=0?'+':'')+diff:'—');
-  const mv=document.getElementById('mv'+pid);
-  if(mv){
-    if(fc===18){mv.textContent='✅ 完了';mv.style.color='var(--gr)';}
-    else if(fc>0){mv.textContent=`${fc}/18H`;mv.style.color='var(--gold)';}
-    else{mv.textContent='未入力';mv.style.color='var(--ts)';}
-  }
-  // update head
-  const head=document.querySelector(`#pr${pid} .pcard-head`);
-  if(head){
-    const sd=head.querySelector('div:nth-child(3)');
-    if(sd){
-      const fc2=p.holes.filter(v=>v!=='').length;
-      const stCls=fc2===18?'vb-ok':fc2>0?'vb-wip':'vb-ng';
-      const stTxt=fc2===18?'✅ 完了':fc2>0?`${fc2}/18H`:'未入力';
-      sd.innerHTML=g>0?`<div class="pgross">${g}</div><div style="font-size:9px;color:var(--ts);">NET ${p.net}</div>`:`<span class="vbadge-inline ${stCls}">${stTxt}</span>`;
-    }
+  setH('out'+pid,`${out||'—'}<span style="font-size:9px;color:var(--ts);"> /36</span>`);
+  setH('in'+pid,`${ins||'—'}<span style="font-size:9px;color:var(--ts);"> /36</span>`);
+  set('mg'+pid,g||'—');set('mn'+pid,g>0?p.net:'—');
+  const diff=g-PAR_TOTAL;set('md'+pid,g>0?(diff>=0?'+':'')+diff:'—');
+  const mv=document.getElementById('mv'+pid);if(mv){if(fc===18){mv.textContent='✅完了';mv.style.color='var(--gr)';}else{mv.textContent=fc+'/18H';mv.style.color=fc>0?'var(--gold)':'var(--ts)';}}
+}
+
+// ════════════════════════════════════════════════════
+//  MEDIA (Drive経由アップロード)
+// ════════════════════════════════════════════════════
+async function handleFiles(e){
+  if(MODE==='member')return;
+  if(!currentCompId){toast('⚠️ まず大会情報を保存してください','warn');return;}
+  const files=Array.from(e.target.files);
+  if(!files.length)return;
+  e.target.value='';
+  const MAX_MB=10;
+  for(const f of files){
+    if(f.size>MAX_MB*1024*1024){toast(`⚠️ ${f.name} は${MAX_MB}MB超のためスキップ`,'warn');continue;}
+    await uploadSingleFile(f);
   }
 }
 
-// ═══════════════════════════════════════════════
-//  MEDIA — REAL FILE UPLOAD (Base64)
-// ═══════════════════════════════════════════════
-function handleFiles(e) {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
-  const c = currentComp(); if(!c) return;
-
-  let loaded = 0;
-  const MAX_SIZE_MB = 5;
-
-  files.forEach(f => {
-    if (f.size > MAX_SIZE_MB * 1024 * 1024) {
-      toast(`⚠️ ${f.name} は${MAX_SIZE_MB}MB超のためスキップしました`, 'err');
-      loaded++;
-      if(loaded===files.length) { renderMedia(); updateSidebar(); markDirty(); }
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      c.media.push({
-        id: 'med_' + Date.now() + '_' + Math.random().toString(36).slice(2,5),
-        name: f.name,
-        type: f.type.startsWith('video') ? 'video' : 'image',
-        data: ev.target.result,   // base64 data URL
-        size: f.size,
-        uploadedAt: new Date().toISOString(),
-      });
-      loaded++;
-      if (loaded === files.length) {
+async function uploadSingleFile(f){
+  return new Promise((resolve)=>{
+    const reader=new FileReader();
+    reader.onload=async(ev)=>{
+      // プレースホルダーをリストに追加
+      const tempId='temp_'+Date.now();
+      const umg=document.getElementById('umg');
+      const div=document.createElement('div');
+      div.className='um';div.id='um'+tempId;
+      div.innerHTML=`<div class="um-prog"><div class="up-pct">0%</div><div class="up-bar"><div class="up-bar-f" id="upf${tempId}" style="width:0%"></div></div><div style="font-size:9px;color:var(--ts);margin-top:4px;">${f.name}</div></div>`;
+      umg.prepend(div);
+      // 進捗アニメ（フェイク）
+      let pct=0;
+      const interval=setInterval(()=>{
+        pct=Math.min(pct+Math.random()*15,90);
+        const bar=document.getElementById('upf'+tempId);
+        const pctEl=div.querySelector('.up-pct');
+        if(bar)bar.style.width=pct+'%';
+        if(pctEl)pctEl.textContent=Math.round(pct)+'%';
+      },300);
+      try{
+        const r=await gasPost({action:'uploadMedia',comp_id:currentCompId,name:f.name,data:ev.target.result});
+        clearInterval(interval);
+        if(!r.ok)throw new Error(r.error);
+        // replace placeholder
+        media.push({media_id:r.media_id,comp_id:currentCompId,name:f.name,mime_type:f.type,drive_file_id:r.file_id,url:r.url,thumb_url:r.thumb});
         renderMedia();
         updateSidebar();
-        markDirty();
-        toast(`📸 ${files.length}件を追加しました`, 'ok');
+        toast(`📸 ${f.name} をDriveに保存しました`,'ok');
+      }catch(err){
+        clearInterval(interval);
+        const el=document.getElementById('um'+tempId);if(el)el.remove();
+        toast(`❌ ${f.name} のアップロード失敗`,'err');
       }
+      resolve();
     };
     reader.readAsDataURL(f);
   });
-  e.target.value = ''; // reset input
 }
 
-function renderMedia() {
-  const media = currentMedia();
-  const w = document.getElementById('umg'); if(!w) return;
-  const mcount = document.getElementById('media-count');
-  if(mcount) mcount.textContent = media.length>0?`(${media.length}件)`:'';
-  if (!media.length) { w.innerHTML=''; return; }
-  w.innerHTML = media.map(m => `
-    <div class="um" onclick="viewMedia('${m.id}')">
-      ${m.type==='video'
-        ? `<video src="${m.data}" muted playsinline style="width:100%;height:100%;object-fit:cover;border-radius:7px;"></video><div class="vbadge">▶</div>`
-        : `<img src="${m.data}" alt="${m.name}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;">`}
+function renderMedia(){
+  const w=document.getElementById('umg');if(!w)return;
+  const mc=document.getElementById('media-count');if(mc)mc.textContent=media.length>0?`(${media.length}件)`:'';
+  if(!media.length){w.innerHTML='';return;}
+  const ro=MODE==='member';
+  w.innerHTML=media.map(m=>`
+    <div class="um" onclick="viewMedia('${m.media_id}')">
+      <img src="${m.thumb_url||m.url}" alt="${m.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+      ${m.mime_type&&m.mime_type.startsWith('video')?'<div class="vbg">▶</div>':''}
       <div class="um-overlay"><div class="um-name">${m.name}</div></div>
-      <button class="um-del" onclick="event.stopPropagation();delMedia('${m.id}')">×</button>
+      ${ro?'':` <button class="um-del" onclick="event.stopPropagation();delMedia('${m.media_id}')">×</button>`}
     </div>`).join('');
 }
 
-function viewMedia(id) {
-  const m = currentMedia().find(x=>x.id===id); if(!m) return;
-  const box = document.getElementById('moImg-content');
-  box.innerHTML = m.type==='video'
-    ? `<video src="${m.data}" controls autoplay style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;"></video>`
-    : `<img src="${m.data}" alt="${m.name}" style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;">`;
-  document.getElementById('moImg-name').textContent = m.name;
+function viewMedia(id){
+  const m=media.find(x=>x.media_id===id);if(!m)return;
+  const box=document.getElementById('moImg-content');
+  const isVid=m.mime_type&&m.mime_type.startsWith('video');
+  box.innerHTML=isVid
+    ?`<video src="${m.url}" controls autoplay style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;"></video>`
+    :`<img src="${m.url}" alt="${m.name}" style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;">`;
+  document.getElementById('moImg-name').textContent=m.name;
   openMo('moImg');
 }
 
-function delMedia(id) {
-  const c = currentComp(); if(!c) return;
-  c.media = c.media.filter(m=>m.id!==id);
-  renderMedia(); updateSidebar(); markDirty();
-  toast('🗑️ メディアを削除しました', '');
+async function delMedia(id){
+  const m=media.find(x=>x.media_id===id);if(!m)return;
+  try{
+    await gasPost({action:'deleteMedia',media_id:id});
+    media=media.filter(x=>x.media_id!==id);
+    renderMedia();updateSidebar();
+    toast('🗑️ メディアを削除しました','');
+  }catch(e){toast('❌ 削除失敗','err');}
 }
 
-// ═══════════════════════════════════════════════
-//  RESULT PAGE
-// ═══════════════════════════════════════════════
-let lastBuiltCompId = null;
-
-function buildRes(force=false) {
-  const vid = resViewCompId || state.currentCompId;
-  if (!force && lastBuiltCompId === vid) return;
-  lastBuiltCompId = vid;
-  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});
-  charts={};
-  const comp = state.comps.find(c=>c.id===vid);
-  if (!comp) return;
-  const players = comp.players;
-  const media   = comp.media;
-  bStats(comp, players);
-  bRanking(players);
-  bHeatmap(players);
-  bCharts(players);
-  bRadar(players);
-  bGallery(media);
-  bHistory();
-  renderResCompStrip();
+// ════════════════════════════════════════════════════
+//  RESULT
+// ════════════════════════════════════════════════════
+function buildRes(comp,pls,med){
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};
+  bStats(comp,pls);bRanking(pls);bHeatmap(pls);bCharts(pls);bRadar(pls);bGallery(med);bHistory();
 }
 
-function bStats(comp, players) {
-  const vp=players.filter(p=>p.gross>0);
+function bStats(comp,pls){
+  const vp=pls.filter(p=>p.gross>0);
   const avg=vp.length?Math.round(vp.reduce((a,p)=>a+p.gross,0)/vp.length*10)/10:'—';
   const best=vp.length?Math.min(...vp.map(p=>p.net)):'—';
-  const num=comp.info.title.match(/\d+/)?.[0]||'?';
+  const num=(comp.title||'').match(/\d+/)?.[0]||'?';
   document.getElementById('resst').innerHTML=`
     <div class="sbc"><div class="sbic">🏆</div><div class="sbv">${num}</div><div class="sbl">開催回</div></div>
-    <div class="sbc"><div class="sbic">👥</div><div class="sbv">${players.length}</div><div class="sbl">参加者</div></div>
+    <div class="sbc"><div class="sbic">👥</div><div class="sbv">${pls.length}</div><div class="sbl">参加者</div></div>
     <div class="sbc"><div class="sbic">⛳</div><div class="sbv">${avg}</div><div class="sbl">平均グロス</div></div>
     <div class="sbc"><div class="sbic">🎯</div><div class="sbv">${best}</div><div class="sbl">最低ネット</div></div>`;
 }
 
-function bRanking(players) {
-  const sorted=[...players].sort((a,b)=>{ if(a.gross===0&&b.gross===0)return 0;if(a.gross===0)return 1;if(b.gross===0)return-1;return a.net-b.net;});
+function bRanking(pls){
+  const sorted=[...pls].sort((a,b)=>{if(a.gross===0&&b.gross===0)return 0;if(a.gross===0)return 1;if(b.gross===0)return-1;return a.net-b.net;});
   const md=['🥇','🥈','🥉'];
   document.getElementById('rklist').innerHTML=sorted.map((p,i)=>{
     const diff=p.gross>0?p.gross-PAR_TOTAL:null;
@@ -1447,11 +1354,11 @@ function bRanking(players) {
         <div style="font-size:9px;color:var(--ts);">${diff!==null?(diff>=0?'+':'')+diff+' vs Par':''}</div>
       </div>
     </div>`;
-  }).join('') || '<div style="color:var(--ts);font-size:13px;padding:16px;text-align:center;">参加者データがありません</div>';
+  }).join('')||'<div style="color:var(--ts);font-size:13px;padding:16px;text-align:center;">参加者データがありません</div>';
 }
 
-function bHeatmap(players) {
-  const fp=players.find(p=>p.gross>0);
+function bHeatmap(pls){
+  const fp=pls.find(p=>p.gross>0);
   document.getElementById('hmg').innerHTML=PARS.map((_,i)=>{
     const s=fp?(Number(fp.holes[i])||PARS[i]+1):PARS[i]+1;
     const d=s-PARS[i];
@@ -1460,111 +1367,94 @@ function bHeatmap(players) {
   }).join('');
 }
 
-function bCharts(players) {
-  const vp=players.filter(p=>p.gross>0);
+function bCharts(pls){
+  const vp=pls.filter(p=>p.gross>0);
   let eagle=0,birdie=0,par=0,bogey=0,dbl=0;
   if(vp.length){vp.forEach(p=>p.holes.forEach((v,i)=>{if(v==='')return;const d=Number(v)-PARS[i];if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par++;else if(d===1)bogey++;else dbl++;}));}
-  else{eagle=3;birdie=8;par=35;bogey=42;dbl=12;}
+  else{eagle=2;birdie=7;par=34;bogey=40;dbl=11;}
   charts.do=new Chart(document.getElementById('ch-do'),{type:'doughnut',data:{labels:['イーグル以下','バーディ','パー','ボギー','ダブル+'],datasets:[{data:[eagle,birdie,par,bogey,dbl],backgroundColor:['#00e676cc','#4caf50cc','#2196f3cc','#ff9800cc','#ff5252cc'],borderWidth:2,borderColor:'#020b18'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},cutout:'60%'}});
-  const bp=players.length>0?players.slice(0,8):[{init:'A',color:'#2196f3',putt:30,ob:1,bunker:3,fw:60}];
+  const bp=pls.length>0?pls.slice(0,8):[{init:'A',color:'#2196f3',putt:30,ob:1,bunker:3,fw:60}];
   charts.bar=new Chart(document.getElementById('ch-bar'),{type:'bar',data:{labels:['パット','OB×5','バンカー×3','FW÷10'],datasets:bp.map(p=>({label:p.init,data:[p.putt,p.ob*5,p.bunker*3,Math.round(p.fw/10)],backgroundColor:p.color+'99',borderColor:p.color,borderWidth:1,borderRadius:4}))},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{grid:{color:'rgba(33,150,243,.1)'}},x:{grid:{color:'rgba(33,150,243,.06)'}}}}});
   const ha=PARS.map((_par,i)=>{const sc=vp.map(p=>Number(p.holes[i])).filter(v=>v>0);return sc.length?sc.reduce((a,b)=>a+b,0)/sc.length:_par+1.2;});
   charts.hole=new Chart(document.getElementById('ch-hole'),{type:'bar',data:{labels:Array.from({length:18},(_,i)=>`H${i+1}`),datasets:[{label:'平均',data:ha,backgroundColor:ha.map((v,i)=>v-PARS[i]<=0?'rgba(0,230,118,.6)':v-PARS[i]<=1?'rgba(33,150,243,.6)':v-PARS[i]<=2?'rgba(255,152,0,.6)':'rgba(255,82,82,.6)'),borderRadius:3},{label:'Par',data:PARS,type:'line',borderColor:'rgba(245,200,66,.7)',backgroundColor:'transparent',pointRadius:3,borderWidth:2,tension:.3}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{min:2,grid:{color:'rgba(33,150,243,.1)'}},x:{grid:{color:'rgba(33,150,243,.06)'}}}}});
-  const sp=[...players].sort((a,b)=>a.net-b.net);
+  const sp=[...pls].sort((a,b)=>a.net-b.net);
   charts.gvn=new Chart(document.getElementById('ch-gvn'),{type:'bar',data:{labels:sp.map(p=>p.init),datasets:[{label:'グロス',data:sp.map(p=>p.gross||0),backgroundColor:sp.map(p=>p.color+'66'),borderColor:sp.map(p=>p.color),borderWidth:2,borderRadius:4},{label:'ネット',data:sp.map(p=>p.net||0),backgroundColor:'rgba(0,200,255,.18)',borderColor:'var(--bg2)',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{min:55,grid:{color:'rgba(33,150,243,.1)'}},x:{grid:{color:'rgba(33,150,243,.06)'}}}}});
 }
 
-function bRadar(players) {
+function bRadar(pls){
   const w=document.getElementById('rdrow');
-  if(!players.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">参加者を追加してください</div>';return;}
+  if(!pls.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">参加者データがありません</div>';return;}
   const rl=['パット数','OB率','バンカー','FW率','リカバリー'];
-  w.innerHTML=players.map((p,i)=>`
-    <div class="rdcard">
-      <div class="rdh">
-        <div class="av" style="color:${p.color};border-color:${p.color};width:32px;height:32px;font-size:10px;">${p.init}</div>
-        <div><div style="font-size:13px;font-weight:700;">${p.name}</div><div style="font-size:9px;color:var(--ts);">HCP ${p.hcp}</div></div>
-        <div style="margin-left:auto;">${p.fw>=65?'<span class="tg tgg">上位</span>':p.fw>=50?'<span class="tg tgb">中級</span>':'<span class="tg tgr">要練習</span>'}</div>
-      </div>
-      <canvas id="rd${i}" height="170"></canvas>
-    </div>`).join('');
-  players.forEach((p,i)=>{
+  w.innerHTML=pls.map((p,i)=>`<div class="rdcard"><div class="rdh"><div class="av" style="color:${p.color};border-color:${p.color};width:32px;height:32px;font-size:10px;">${p.init}</div><div><div style="font-size:13px;font-weight:700;">${p.name}</div><div style="font-size:9px;color:var(--ts);">HCP ${p.hcp}</div></div></div><canvas id="rd${i}" height="170"></canvas></div>`).join('');
+  pls.forEach((p,i)=>{
     const sc=[Math.max(1,Math.min(5,Math.round(5-(p.putt-28)/3))),Math.max(1,Math.min(5,5-p.ob*1.5)),Math.max(1,Math.min(5,5-p.bunker*.5)),Math.max(1,Math.min(5,Math.round(p.fw/20))),Math.max(1,Math.min(5,3+Math.round((p.fw-50)/25)))].map(v=>Math.max(1,Math.min(5,Math.round(v))));
     new Chart(document.getElementById('rd'+i),{type:'radar',data:{labels:rl,datasets:[{label:p.name,data:sc,backgroundColor:p.color+'33',borderColor:p.color,borderWidth:2,pointBackgroundColor:p.color,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{r:{min:0,max:5,ticks:{stepSize:1,display:false},grid:{color:'rgba(33,150,243,.2)'},angleLines:{color:'rgba(33,150,243,.2)'},pointLabels:{font:{size:9},color:'#78a6c8'}}}}});
   });
 }
 
-function bGallery(media) {
-  const w=document.getElementById('galg'); if(!w) return;
-  if(!media.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">写真・動画がありません</div>';return;}
-  w.innerHTML=media.map(m=>`
-    <div class="gi" onclick="viewMediaResult('${m.id}')">
-      ${m.type==='video'
-        ?`<video src="${m.data}" muted style="width:100%;height:100%;object-fit:cover;"></video><div class="gi-vbadge">▶</div>`
-        :`<img src="${m.data}" alt="${m.name}" style="width:100%;height:100%;object-fit:cover;">`}
-      <div class="gi-overlay"><div class="gi-name">${m.name}</div></div>
-    </div>`).join('');
+function bGallery(med){
+  const w=document.getElementById('galg');if(!w)return;
+  if(!med.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">写真・動画がありません</div>';return;}
+  w.innerHTML=med.map(m=>`<div class="gi" onclick="viewGalMedia('${m.media_id||m.drive_file_id}','${(m.mime_type||'').startsWith('video')?'video':'image'}','${m.url}','${m.name}')"><img src="${m.thumb_url||m.url}" alt="${m.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">${(m.mime_type||'').startsWith('video')?'<div class="gi-vb">▶</div>':''}<div class="gi-overlay"><div class="gi-name">${m.name}</div></div></div>`).join('');
 }
 
-function viewMediaResult(id) {
-  const vid = resViewCompId || state.currentCompId;
-  const comp = state.comps.find(c=>c.id===vid);
-  if(!comp) return;
-  const m = comp.media.find(x=>x.id===id); if(!m) return;
+function viewGalMedia(id,type,url,name){
   const box=document.getElementById('moImg-content');
-  box.innerHTML=m.type==='video'
-    ?`<video src="${m.data}" controls autoplay style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;"></video>`
-    :`<img src="${m.data}" alt="${m.name}" style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;">`;
-  document.getElementById('moImg-name').textContent=m.name;
+  box.innerHTML=type==='video'
+    ?`<video src="${url}" controls autoplay style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;"></video>`
+    :`<img src="${url}" alt="${name}" style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;">`;
+  document.getElementById('moImg-name').textContent=name;
   openMo('moImg');
 }
 
-function bHistory() {
-  const w=document.getElementById('hist-list'); if(!w) return;
-  if(!state.comps.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">コンペ履歴がありません</div>';return;}
-  const vid=resViewCompId||state.currentCompId;
-  w.innerHTML=[...state.comps].reverse().map(c=>{
-    const vp=c.players.filter(p=>p.gross>0);
-    const winner=vp.length?[...vp].sort((a,b)=>a.net-b.net)[0]:null;
-    return`<div class="hist-item ${c.id===vid?'on':''}" onclick="switchResComp('${c.id}')">
-      <div class="hist-num">⛳ #${c.info.title.match(/\d+/)?.[0]||'?'}</div>
-      <div class="hist-info">
-        <div class="hist-title">${c.info.title||'（未設定）'}</div>
-        <div class="hist-sub">${c.info.date||''} ${c.info.course?'｜'+c.info.course:''} ｜ ${c.players.length}名参加 ｜ 写真${c.media.length}件</div>
-      </div>
-      ${winner?`<div class="hist-winner">🏆 ${winner.name}</div>`:''}
-      <button class="hist-del" onclick="event.stopPropagation();deleteComp('${c.id}')" title="削除">🗑️</button>
-    </div>`;
-  }).join('');
+function bHistory(){
+  const w=document.getElementById('hist-list');if(!w)return;
+  if(!comps.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">コンペ履歴がありません</div>';return;}
+  const vid=resCompId||currentCompId;
+  const ro=MODE==='member';
+  w.innerHTML=comps.map(c=>`<div class="hist-item ${c.comp_id===vid?'on':''}" onclick="switchResComp('${c.comp_id}')">
+    <div class="hist-num">⛳ #${(c.title||'').match(/\d+/)?.[0]||'?'}</div>
+    <div class="hist-info"><div class="hist-title">${c.title||'（未設定）'}</div><div class="hist-sub">${c.date||''} ${c.course?'｜'+c.course:''}</div></div>
+    ${ro?'':` <button class="hist-del" onclick="event.stopPropagation();deleteComp('${c.comp_id}')">🗑️</button>`}
+  </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════
-//  TAB
-// ═══════════════════════════════════════════════
-function swTab(id,btn){
-  ['tr','tan','trd','tgal','thist'].forEach(t=>{const e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none';});
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
+// ════════════════════════════════════════════════════
+//  PAGE NAV
+// ════════════════════════════════════════════════════
+const PGS=['p1','p2','p3','p4'],SBS=['s1','s2','s3','s4'],MBS=['mb1','mb2','mb3','mb4'],HPS=['hp1',null,null,'hp4'];
+function goPg(id){
+  PGS.forEach(p=>document.getElementById(p).classList.remove('on'));
+  SBS.forEach(s=>document.getElementById(s).classList.remove('on'));
+  MBS.forEach(m=>document.getElementById(m).classList.remove('on'));
+  HPS.forEach(h=>{if(h)document.getElementById(h).classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  const i=PGS.indexOf(id);
+  if(i>=0){document.getElementById(SBS[i]).classList.add('on');document.getElementById(MBS[i]).classList.add('on');if(HPS[i])document.getElementById(HPS[i]).classList.add('on');}
+  document.getElementById('cnt').scrollTop=0;
+  if(id==='p4'){
+    const c=comps.find(x=>x.comp_id===(resCompId||currentCompId))||{};
+    buildRes(c,players,media);
+  }
+}
+function markStep(n,done){document.getElementById('d'+n).style.background=done?'var(--gr)':'';document.getElementById('s'+n).classList.toggle('done',done);}
+function swTab(id,btn){['tr','tan','trd','tgal','thist'].forEach(t=>{const e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none';});document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');}
+function updateSidebar(){
+  const c=comps.find(x=>x.comp_id===currentCompId);
+  document.getElementById('sb-comp').textContent=c?c.title||'（未設定）':'—';
+  document.getElementById('sbm').textContent=players.length+'名';
+  document.getElementById('pcnt').textContent=players.length+'名';
+  const hint=document.getElementById('apb-hint');
+  if(hint){hint.textContent=players.length>=MAX_PLAYERS?'上限に達しました':`残り${MAX_PLAYERS-players.length}名`;hint.style.color=players.length>=MAX_PLAYERS?'var(--rd)':'var(--ts)';}
+  const mc=document.getElementById('media-count');if(mc)mc.textContent=media.length>0?`(${media.length}件)`:'';
 }
 
-// ═══════════════════════════════════════════════
-//  MODAL
-// ═══════════════════════════════════════════════
+// modal / toast / loading
 function openMo(id){document.getElementById(id).classList.add('open');}
-function closeMo(id){
-  document.getElementById(id).classList.remove('open');
-  // stop video if any
-  const v=document.querySelector(`#${id} video`);
-  if(v){v.pause();}
-}
-
-// ═══════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════
-function toast(m, type='') {
-  const t=document.getElementById('toast');
-  t.textContent=m; t.className=type?`show ${type}`:'show';
-  clearTimeout(t._t); t._t=setTimeout(()=>t.className='',2800);
-}
+function closeMo(id){document.getElementById(id).classList.remove('open');const v=document.querySelector(`#${id} video`);if(v)v.pause();}
+function showLoading(msg){const l=document.getElementById('loading');l.classList.add('show');if(msg)document.getElementById('loading-msg').textContent=msg;}
+function hideLoading(){document.getElementById('loading').classList.remove('show');}
+function toast(m,type=''){const t=document.getElementById('toast');t.textContent=m;t.className=type?`show ${type}`:'show';clearTimeout(t._t);t._t=setTimeout(()=>t.className='',3000);}
 </script>
 </body>
 </html>
