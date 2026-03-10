@@ -679,6 +679,57 @@ input[type=number]{-moz-appearance:textfield;}
   </div>
 </div>
 
+<!-- EDIT SCORE MODAL -->
+<div class="mo" id="moEditScore" onclick="if(event.target===this)closeMo('moEditScore')">
+  <div class="mob" style="max-width:560px;">
+    <div class="mob-handle"></div>
+    <button class="moc" onclick="closeMo('moEditScore')">✕</button>
+    <div class="mot" id="edit-score-title">✏️ スコア修正</div>
+
+    <!-- 対象プレーヤー表示 -->
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(13,58,92,.35);border-radius:8px;border:1px solid var(--br);margin-bottom:14px;">
+      <div class="av" id="es-av" style="width:36px;height:36px;font-size:11px;">—</div>
+      <div>
+        <div id="es-name" style="font-size:14px;font-weight:600;">—</div>
+        <div id="es-hcp" style="font-size:10px;color:var(--ts);">HCP —</div>
+      </div>
+      <div style="margin-left:auto;text-align:right;">
+        <div id="es-gross" style="font-family:'Orbitron',sans-serif;font-size:16px;color:var(--bg2);">—</div>
+        <div id="es-net" style="font-size:9px;color:var(--ts);">NET —</div>
+      </div>
+    </div>
+
+    <!-- OUT -->
+    <div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--bg2);letter-spacing:2px;margin-bottom:6px;">OUT</div>
+    <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:10px;" id="es-out-grid"></div>
+
+    <!-- IN -->
+    <div style="font-family:'Orbitron',sans-serif;font-size:9px;color:var(--bg2);letter-spacing:2px;margin-bottom:6px;">IN</div>
+    <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:14px;" id="es-in-grid"></div>
+
+    <!-- 合計表示 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+      <div style="background:rgba(13,58,92,.4);border:1px solid var(--br);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-family:'Orbitron',sans-serif;font-size:16px;color:var(--bg2);" id="es-out-tot">—</div>
+        <div style="font-size:8px;color:var(--ts);">OUT</div>
+      </div>
+      <div style="background:rgba(13,58,92,.4);border:1px solid var(--br);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-family:'Orbitron',sans-serif;font-size:16px;color:var(--bg2);" id="es-in-tot">—</div>
+        <div style="font-size:8px;color:var(--ts);">IN</div>
+      </div>
+      <div style="background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-family:'Orbitron',sans-serif;font-size:16px;color:var(--bg2);" id="es-gross-tot">—</div>
+        <div style="font-size:8px;color:var(--ts);">GROSS</div>
+      </div>
+    </div>
+
+    <div class="brow" style="margin-top:0;">
+      <button class="btn bgh" style="font-size:12px;" onclick="closeMo('moEditScore')">キャンセル</button>
+      <button class="btn bp" style="font-size:12px;" onclick="applyEditScore()">✅ 修正を適用</button>
+    </div>
+  </div>
+</div>
+
 <!-- IMAGE VIEWER -->
 <div class="mo" id="moImg" onclick="closeMo('moImg')">
   <div class="mob" style="max-width:640px;background:#000;border-radius:12px;padding:10px;">
@@ -1156,10 +1207,12 @@ function renderPList(){
           <div class="xst-row"><span class="xst-label">⚠️ OB</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'ob',-1)">−</div><div class="xst-val" id="xo${p.id}">${p.ob}</div><div class="xst-btn" onclick="adjSt(${p.id},'ob',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div></div>
           <div><div class="xst-row"><span class="xst-label">🏖️ バンカー</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'bunker',-1)">−</div><div class="xst-val" id="xb${p.id}">${p.bunker}</div><div class="xst-btn" onclick="adjSt(${p.id},'bunker',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div>
           <div class="xst-row"><span class="xst-label">🌿 FW率</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'fw',-5)">−</div><div class="xst-val" id="xf${p.id}">${p.fw}</div><div class="xst-btn" onclick="adjSt(${p.id},'fw',+5)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">%</span></div></div></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-          <button class="btn bdn" onclick="askDelPlayer(${p.id})">🗑️ 削除</button>
         </div>`}
+        <div class="dv"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap;">
+          <button class="btn" style="background:rgba(33,150,243,.12);border:1px solid rgba(33,150,243,.35);color:var(--bb);height:36px;font-size:11px;padding:0 14px;" onclick="openEditScoreMo(${p.id})">✏️ スコア修正</button>
+          <button class="btn bdn" onclick="askDelPlayer(${p.id})">🗑️ 削除</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1167,6 +1220,101 @@ function renderPList(){
 }
 
 function togP(id){document.getElementById('pr'+id).classList.toggle('open');}
+
+// ════════════════════════════════════════════════════
+//  EDIT SCORE MODAL
+// ════════════════════════════════════════════════════
+let editingPlayerId=null;
+let editHoles=[];
+
+function openEditScoreMo(pid){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  editingPlayerId=pid;
+  editHoles=[...p.holes]; // コピー
+
+  // ヘッダー情報をセット
+  const av=document.getElementById('es-av');
+  av.textContent=p.init;av.style.color=p.color;av.style.borderColor=p.color;
+  document.getElementById('es-name').textContent=p.name;
+  document.getElementById('es-hcp').textContent='HCP '+p.hcp;
+  document.getElementById('edit-score-title').textContent=`✏️ ${p.name} のスコア修正`;
+
+  // グリッドを構築
+  buildEditGrid('es-out-grid',[0,1,2,3,4,5,6,7,8]);
+  buildEditGrid('es-in-grid',[9,10,11,12,13,14,15,16,17]);
+  updateEditTotals();
+  openMo('moEditScore');
+}
+
+function buildEditGrid(containerId,indices){
+  const w=document.getElementById(containerId);
+  w.innerHTML=indices.map(i=>`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+      <div style="font-size:9px;color:var(--ts);font-weight:600;">${i+1}</div>
+      <div style="font-size:8px;color:var(--gold);">P${PARS[i]}</div>
+      <input type="number" min="1" max="15" inputmode="numeric"
+        id="es_h${i}" value="${editHoles[i]||''}"
+        class="sc-inp"
+        style="width:100%;aspect-ratio:1;"
+        oninput="onEditH(${i},this)"
+        onfocus="this.select()">
+      <div style="display:flex;gap:2px;width:100%;">
+        <div class="sc-btn" style="flex:1;height:20px;" onclick="adjEditH(${i},-1)">−</div>
+        <div class="sc-btn" style="flex:1;height:20px;" onclick="adjEditH(${i},+1)">＋</div>
+      </div>
+    </div>`).join('');
+  // 色を適用
+  indices.forEach(i=>{
+    if(editHoles[i]!==''){
+      const e=document.getElementById('es_h'+i);
+      if(e)clrH(e,PARS[i]);
+    }
+  });
+}
+
+function onEditH(hi,inp){
+  const v=inp.value===''?'':(parseInt(inp.value)||'');
+  if(v!==''&&(v<1||v>15)){
+    inp.classList.add('err-val');inp.value='';
+    editHoles[hi]='';
+    toast('⚠️ スコアは1〜15で入力してください','warn');
+  }else{
+    editHoles[hi]=v;
+    clrH(inp,PARS[hi]);
+  }
+  updateEditTotals();
+}
+
+function adjEditH(hi,delta){
+  const cur=editHoles[hi]===''?PARS[hi]:Number(editHoles[hi]);
+  const nv=Math.max(1,Math.min(15,cur+delta));
+  editHoles[hi]=nv;
+  const inp=document.getElementById('es_h'+hi);
+  if(inp){inp.value=nv;clrH(inp,PARS[hi]);}
+  updateEditTotals();
+}
+
+function updateEditTotals(){
+  const out=[0,1,2,3,4,5,6,7,8].reduce((a,i)=>a+(Number(editHoles[i])||0),0);
+  const ins=[9,10,11,12,13,14,15,16,17].reduce((a,i)=>a+(Number(editHoles[i])||0),0);
+  const gross=out+ins;
+  const p=players.find(x=>x.id===editingPlayerId);
+  const net=p&&gross>0?gross-p.hcp:0;
+  document.getElementById('es-out-tot').textContent=out||'—';
+  document.getElementById('es-in-tot').textContent=ins||'—';
+  document.getElementById('es-gross-tot').textContent=gross||'—';
+  document.getElementById('es-gross').textContent=gross||'—';
+  document.getElementById('es-net').textContent=gross>0?'NET '+net:'NET —';
+}
+
+function applyEditScore(){
+  const p=players.find(x=>x.id===editingPlayerId);if(!p)return;
+  p.holes=[...editHoles];
+  recalc(p.id);
+  renderPList(); // カード全体を再描画して反映
+  closeMo('moEditScore');
+  toast(`✅ ${p.name} のスコアを修正しました。忘れず「スコアを保存」してください。`,'ok');
+}
 
 // ════════════════════════════════════════════════════
 //  SCORE
