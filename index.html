@@ -910,13 +910,31 @@ async function loadCurrentComp(){
   if(sr.ok) players=parsePlayersFromRows(sr.data);
   // media
   const mr=await gasGet({action:'getMedia',comp_id:currentCompId});
-  if(mr.ok) media=mr.data||[];
+  if(mr.ok) media=(mr.data||[]).map(normalizeMedia);
   // fill form
   const c=comps.find(x=>x.comp_id===currentCompId);
   if(c) fillInfoForm(c);
   renderPList();
   renderMedia();
   updateSidebar();
+}
+
+// メディアオブジェクトのキー名を正規化（GASから返るキー名の揺れに対応）
+function normalizeMedia(m){
+  // 実際のシート列名: media_id, comp_id, file_name, drive_url, type, uploaded_at
+  const mediaId  = String(m.media_id   || '');
+  const compId   = String(m.comp_id    || '');
+  // name: file_name → name いずれにも対応
+  const name     = String(m.file_name  || m.name || '');
+  // url: drive_url → url いずれにも対応
+  const url      = String(m.drive_url  || m.url  || '');
+  // mime_type: type → mime_type いずれにも対応
+  const mimeType = String(m.type       || m.mime_type || '');
+  // thumb_urlはないのでurlを使う
+  const thumbUrl = String(m.thumb_url  || m.thumb || url);
+  const uploadedAt = String(m.uploaded_at || '');
+  return {media_id:mediaId, comp_id:compId, name, mime_type:mimeType,
+          url, thumb_url:thumbUrl, uploaded_at:uploadedAt};
 }
 
 function parsePlayersFromRows(rows){
@@ -988,7 +1006,7 @@ async function switchResComp(id){
     const mr=await gasGet({action:'getMedia',comp_id:id});
     const c=comps.find(x=>x.comp_id===id)||{};
     renderResCompStrip();
-    buildRes(c,sr.ok?parsePlayersFromRows(sr.data):[],mr.ok?mr.data:[]);
+    buildRes(c,sr.ok?parsePlayersFromRows(sr.data):[],(mr.ok?mr.data:[]).map(normalizeMedia));
     hideLoading();
   }catch(e){hideLoading();toast('❌ 読み込み失敗','err');}
 }
