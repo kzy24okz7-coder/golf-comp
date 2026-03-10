@@ -920,17 +920,24 @@ async function loadCurrentComp(){
 }
 
 function parsePlayersFromRows(rows){
-  return rows.map(r=>({
-    id:r.player_id||r.score_id,
-    name:r.name, init:r.init, color:r.color||COLORS[0],
-    hcp:Number(r.hcp||0),
-    holes:[r.h1,r.h2,r.h3,r.h4,r.h5,r.h6,r.h7,r.h8,r.h9,
-           r.h10,r.h11,r.h12,r.h13,r.h14,r.h15,r.h16,r.h17,r.h18]
-           .map(v=>v===''||v===null||v===undefined?'':Number(v)),
-    gross:Number(r.gross||0), net:Number(r.net||0),
-    putt:Number(r.putt||30), ob:Number(r.ob||0),
-    bunker:Number(r.bunker||2), fw:Number(r.fw||55),
-  }));
+  return rows.map(r=>{
+    // GASから返る値がオブジェクト（キー参照）か配列かどちらでも動くよう防御
+    const name   = r.name   != null ? String(r.name)   : '';
+    const init   = r.init   != null ? String(r.init)   : (name ? name.slice(0,2).toUpperCase() : '??');
+    const color  = r.color  != null ? String(r.color)  : COLORS[0];
+    const hcp    = Number(r.hcp  || 0);
+    const gross  = Number(r.gross|| 0);
+    const net    = Number(r.net  || 0);
+    const putt   = Number(r.putt || 30);
+    const ob     = Number(r.ob   || 0);
+    const bunker = Number(r.bunker|| 2);
+    const fw     = Number(r.fw   || 55);
+    const id     = (r.player_id != null && r.player_id !== '') ? String(r.player_id) : String(r.score_id || Date.now());
+    const holes  = [r.h1,r.h2,r.h3,r.h4,r.h5,r.h6,r.h7,r.h8,r.h9,
+                    r.h10,r.h11,r.h12,r.h13,r.h14,r.h15,r.h16,r.h17,r.h18]
+                    .map(v=>(v===''||v===null||v===undefined)?'':Number(v));
+    return {id, name, init, color, hcp, holes, gross, net, putt, ob, bunker, fw};
+  });
 }
 
 function fillInfoForm(c){
