@@ -1,0 +1,1293 @@
+<script>
+// ═══ 接続設定（ここだけ変更すればOK）═══
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzu-b9SgY2qXkdv4Ef4erm7wpSmXv-cQD1kSnfhdNPKKDjYb8z8Ja5d5drei96JtmfQ/exec';
+const DRIVE_FOLDER = 'https://drive.google.com/drive/folders/1lWraAcCQ1kksfnGL4So4CtXaEPeH7nyP?usp=sharing';
+</script>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>⛳ Golf Comp Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Orbitron:wght@400;700;900&display=swap');
+:root{
+  --bg:#020b18;--card:#071828;--card2:#0a2035;--bd:#0d3a5c;--bm:#1565a8;--bb:#2196f3;
+  --bg2:#00c8ff;--gold:#f5c842;--gold2:#e6a817;--sv:#b0bec5;--gr:#00e676;--rd:#ff5252;
+  --tx:#e8f4fd;--ts:#78a6c8;--br:rgba(33,150,243,.25);--glow:0 0 20px rgba(0,200,255,.3);
+  --tap:44px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);
+  background-image:
+    radial-gradient(ellipse at 15% 0%,rgba(13,58,92,.65) 0%,transparent 50%),
+    radial-gradient(ellipse at 85% 100%,rgba(21,101,168,.4) 0%,transparent 50%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(33,150,243,.04) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(33,150,243,.04) 40px);}
+
+/* ═══ HEADER ═══ */
+header{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
+  background:rgba(7,24,40,.98);border-bottom:1px solid var(--br);
+  position:fixed;top:0;left:0;right:0;z-index:300;backdrop-filter:blur(12px);}
+.logo-ic{font-size:22px;filter:drop-shadow(0 0 7px rgba(0,200,255,.6));}
+.logo-tx{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--bg2),var(--bb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-sb{font-size:7px;color:var(--ts);letter-spacing:3px;}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:5px;}
+.hpill{padding:0 11px;height:30px;border-radius:15px;font-size:10px;cursor:pointer;
+  border:1px solid var(--br);background:rgba(13,58,92,.3);color:var(--ts);
+  transition:.2s;letter-spacing:.5px;white-space:nowrap;display:flex;align-items:center;gap:4px;}
+.hpill.on{background:rgba(0,200,255,.15);border-color:var(--bg2);color:var(--bg2);box-shadow:0 0 10px rgba(0,200,255,.2);}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--gr);box-shadow:0 0 6px var(--gr);animation:pulse 2s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+
+/* ═══ LAYOUT ═══ */
+.main{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex;overflow:hidden;}
+.sidebar{width:190px;flex-shrink:0;background:rgba(7,24,40,.85);border-right:1px solid var(--br);
+  display:flex;flex-direction:column;padding:12px 10px;gap:4px;overflow-y:auto;}
+@media(max-width:640px){.sidebar{display:none;}}
+.si{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:.2s;border:1px solid transparent;min-height:var(--tap);}
+.si:hover{background:rgba(33,150,243,.08);border-color:var(--br);}
+.si.on{background:rgba(0,200,255,.1);border-color:var(--bg2);}
+.si.done .sd{background:var(--gr)!important;box-shadow:0 0 6px var(--gr);}
+.si.on .sd{background:var(--bg2);box-shadow:0 0 8px var(--bg2);}
+.sd{width:7px;height:7px;border-radius:50%;background:rgba(33,150,243,.25);flex-shrink:0;transition:.3s;}
+.sl strong{display:block;font-size:11px;color:var(--tx);}
+.sl span{font-size:9px;color:var(--ts);}
+.sdiv{height:1px;background:linear-gradient(90deg,transparent,var(--br),transparent);margin:6px 0;}
+.sfoot{margin-top:auto;padding:10px;background:rgba(13,58,92,.3);border-radius:9px;border:1px solid var(--br);}
+.sfoot .lbl{font-size:8px;color:var(--ts);letter-spacing:2px;text-transform:uppercase;}
+.sfoot .val{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--bg2);margin-bottom:6px;}
+
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.page{display:none;animation:fadeUp .3s ease;}
+.page.on{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.wrap{max-width:860px;margin:0 auto;padding:16px 12px 90px;}
+
+/* ═══ SECTION TITLE ═══ */
+.sec{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;color:var(--bg2);
+  text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--bg2),transparent);opacity:.4;}
+
+/* ═══ CARD ═══ */
+.card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);
+  border-radius:12px;padding:14px;margin-bottom:12px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--bb),transparent);}
+
+/* ═══ FORM ═══ */
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:9px;letter-spacing:1.5px;color:var(--ts);text-transform:uppercase;}
+.fg input,.fg select,.fg textarea{
+  background:rgba(13,58,92,.45);border:1px solid var(--br);border-radius:8px;
+  padding:0 12px;height:var(--tap);color:var(--tx);
+  font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;transition:.2s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--bg2);box-shadow:0 0 8px rgba(0,200,255,.2);}
+.fg textarea{height:60px;padding:10px 12px;resize:vertical;}
+.fg select option{background:#071828;}
+.fg input.err{border-color:var(--rd)!important;box-shadow:0 0 6px rgba(255,82,82,.25);}
+.fg .em{font-size:10px;color:var(--rd);display:none;margin-top:2px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:460px){.g2{grid-template-columns:1fr;}}
+
+/* ═══ PROGRESS BAR ═══ */
+.prog-wrap{margin-bottom:18px;}
+.prog-steps{display:flex;align-items:center;gap:0;}
+.prog-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.prog-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;border:2px solid var(--br);background:var(--card);transition:.3s;font-weight:700;}
+.prog-step.on .prog-dot{border-color:var(--bg2);background:rgba(0,200,255,.15);box-shadow:0 0 14px rgba(0,200,255,.35);}
+.prog-step.done .prog-dot{border-color:var(--gr);background:rgba(0,230,118,.15);color:var(--gr);}
+.prog-lbl{font-size:9px;color:var(--ts);letter-spacing:.5px;white-space:nowrap;}
+.prog-step.on .prog-lbl{color:var(--bg2);}
+.prog-step.done .prog-lbl{color:var(--gr);}
+.prog-line{height:2px;background:var(--br);flex:1;margin-top:-18px;z-index:0;transition:.4s;}
+.prog-line.done{background:var(--gr);}
+
+/* ═══ PLAYERS ═══ */
+.plist{display:flex;flex-direction:column;gap:6px;}
+
+/* Player card */
+.pcard{background:rgba(13,58,92,.2);border:1px solid var(--br);border-radius:10px;overflow:hidden;transition:border-color .2s;}
+.pcard:hover{border-color:rgba(33,150,243,.5);}
+.pcard-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;min-height:var(--tap);user-select:none;}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;border:2px solid;flex-shrink:0;}
+.pname{font-size:14px;font-weight:600;flex:1;}
+.phcp{font-size:9px;color:var(--ts);}
+.pgross{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--bg2);}
+.pnet-lbl{font-size:9px;color:var(--ts);}
+.pchev{color:var(--ts);font-size:16px;transition:.3s;flex-shrink:0;padding:4px;}
+.pcard.open .pchev{transform:rotate(90deg);}
+.pbody{display:none;padding:12px;border-top:1px solid rgba(33,150,243,.12);}
+.pcard.open .pbody{display:block;}
+
+/* ═══ SCORE INPUT STEPPER ═══ */
+/* Stepper for numeric input — large tap targets, +/- buttons */
+.sc-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:6px;}
+.sc-cell{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.sc-hl{font-size:9px;color:var(--ts);text-align:center;font-weight:600;}
+.sc-par{font-size:8px;color:var(--gold);text-align:center;}
+.sc-inp-wrap{position:relative;width:100%;}
+.sc-inp{
+  width:100%;aspect-ratio:1;border-radius:7px;border:1px solid var(--br);
+  background:rgba(13,58,92,.5);color:var(--tx);text-align:center;
+  font-size:15px;font-weight:700;outline:none;transition:.15s;
+  -moz-appearance:textfield;font-family:'Noto Sans JP',sans-serif;
+  padding:0;cursor:pointer;}
+.sc-inp::-webkit-inner-spin-button,.sc-inp::-webkit-outer-spin-button{-webkit-appearance:none;}
+.sc-inp:focus{border-color:var(--bg2);background:rgba(0,200,255,.1);box-shadow:0 0 8px rgba(0,200,255,.2);}
+.sc-inp.eagle{background:rgba(0,230,118,.3)!important;border-color:var(--gr)!important;color:#fff!important;}
+.sc-inp.birdie{background:rgba(0,230,118,.15)!important;border-color:rgba(0,230,118,.5)!important;color:var(--gr)!important;}
+.sc-inp.par{}
+.sc-inp.bogey{background:rgba(255,152,0,.12)!important;border-color:rgba(255,152,0,.45)!important;color:#ff9800!important;}
+.sc-inp.dbogey{background:rgba(255,82,82,.18)!important;border-color:rgba(255,82,82,.5)!important;color:var(--rd)!important;}
+.sc-inp.err-val{border-color:var(--rd)!important;animation:shake .3s ease;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
+
+/* stepper +/- */
+.sc-pm{display:flex;justify-content:space-between;width:100%;gap:2px;margin-top:2px;}
+.sc-btn{flex:1;height:22px;border:1px solid var(--br);border-radius:4px;background:rgba(13,58,92,.4);
+  color:var(--ts);font-size:14px;font-weight:700;cursor:pointer;transition:.15s;
+  display:flex;align-items:center;justify-content:center;line-height:1;}
+.sc-btn:active{background:rgba(0,200,255,.2);color:var(--bg2);}
+
+/* section label (OUT/IN) */
+.sc-section{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:6px;}
+.sc-section-lbl{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--bg2);letter-spacing:2px;}
+.sc-section-line{height:1px;background:linear-gradient(90deg,var(--bg2),transparent);opacity:.3;}
+.sc-section-tot{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;}
+
+/* mini stats row */
+.mst{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;}
+.ms{background:rgba(13,58,92,.35);border:1px solid var(--br);border-radius:7px;padding:7px 4px;text-align:center;}
+.mv{font-family:'Orbitron',sans-serif;font-size:14px;color:var(--bg2);}
+.ml{font-size:8px;color:var(--ts);letter-spacing:.5px;text-transform:uppercase;margin-top:1px;}
+
+/* additional stats */
+.xst-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.xst-row{display:flex;align-items:center;gap:8px;}
+.xst-label{font-size:11px;color:var(--ts);flex:1;}
+.xst-stepper{display:flex;align-items:center;gap:4px;}
+.xst-val{font-family:'Orbitron',sans-serif;font-size:16px;color:var(--bg2);min-width:32px;text-align:center;}
+.xst-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--br);background:rgba(13,58,92,.4);
+  color:var(--ts);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.xst-btn:active{background:rgba(0,200,255,.2);color:var(--bg2);}
+
+/* validation badge */
+.vbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:10px;margin-left:auto;}
+.vbadge.ok{background:rgba(0,230,118,.12);color:var(--gr);border:1px solid rgba(0,230,118,.3);}
+.vbadge.ng{background:rgba(255,82,82,.12);color:var(--rd);border:1px solid rgba(255,82,82,.3);}
+.vbadge.wip{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
+
+/* ═══ BUTTONS ═══ */
+.btn{border:none;border-radius:9px;padding:0 20px;height:var(--tap);
+  font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  letter-spacing:.5px;transition:.25s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+.btn:active{transform:scale(.97);}
+.bp{background:linear-gradient(135deg,var(--bm),var(--bb));color:#fff;box-shadow:0 4px 14px rgba(33,150,243,.4);}
+.bp:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(33,150,243,.6);}
+.bg0{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#000;box-shadow:0 4px 14px rgba(245,200,66,.35);}
+.bg0:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(245,200,66,.55);}
+.bgh{background:transparent;border:1px solid var(--br);color:var(--ts);}
+.bgh:hover{border-color:var(--bg2);color:var(--bg2);}
+.bdn{background:rgba(255,82,82,.12);border:1px solid rgba(255,82,82,.3);color:var(--rd);height:34px;font-size:11px;padding:0 12px;}
+.bdn:active{background:rgba(255,82,82,.25);}
+.brow{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px;}
+
+/* add player btn */
+.apb{display:flex;align-items:center;gap:10px;min-height:var(--tap);padding:0 14px;
+  background:rgba(33,150,243,.05);border:1px dashed var(--br);border-radius:10px;
+  cursor:pointer;transition:.2s;color:var(--ts);font-size:13px;}
+.apb:hover,.apb:active{background:rgba(0,200,255,.1);border-color:var(--bg2);color:var(--bg2);}
+
+/* ═══ UPLOAD ═══ */
+.upz{border:2px dashed var(--br);border-radius:10px;padding:22px;text-align:center;
+  cursor:pointer;transition:.3s;background:rgba(13,58,92,.1);min-height:90px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.upz:active{border-color:var(--bg2);background:rgba(0,200,255,.04);}
+.umg{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:10px;}
+.um{aspect-ratio:1;border-radius:7px;border:1px solid var(--br);background:rgba(13,58,92,.4);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  position:relative;cursor:pointer;transition:.2s;}
+.um:active{border-color:var(--bg2);transform:scale(1.04);}
+.uc{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.72);font-size:7px;padding:3px;text-align:center;color:var(--ts);}
+.vb{position:absolute;top:3px;right:3px;background:rgba(255,82,82,.9);border-radius:3px;padding:1px 4px;font-size:7px;font-weight:700;}
+
+/* ═══ RESULT ═══ */
+.sband{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+@media(max-width:500px){.sband{grid-template-columns:repeat(2,1fr);}}
+.sbc{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);
+  border-radius:9px;padding:11px;text-align:center;position:relative;overflow:hidden;}
+.sbc::after{content:'';position:absolute;bottom:0;right:0;width:32px;height:32px;border-radius:50% 0 0 0;background:rgba(33,150,243,.05);}
+.sbv{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;
+  background:linear-gradient(135deg,var(--bg2),var(--bb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:2px;}
+.sbl{font-size:8px;color:var(--ts);letter-spacing:2px;text-transform:uppercase;}
+.sbic{font-size:14px;margin-bottom:3px;}
+
+/* tab */
+.tbar{display:flex;gap:3px;margin-bottom:12px;background:rgba(13,58,92,.3);border-radius:9px;padding:3px;border:1px solid var(--br);}
+.tbtn{flex:1;height:34px;border:none;border-radius:7px;background:transparent;color:var(--ts);
+  font-family:'Noto Sans JP',sans-serif;font-size:10px;cursor:pointer;transition:.2s;padding:0 2px;}
+.tbtn.on{background:linear-gradient(135deg,var(--bm),var(--bd));color:var(--bg2);box-shadow:0 0 10px rgba(0,200,255,.15);}
+
+/* ranking */
+.rklist{display:flex;flex-direction:column;gap:7px;}
+.rki{display:flex;align-items:center;gap:9px;padding:10px 12px;
+  background:rgba(13,58,92,.2);border:1px solid var(--br);border-radius:10px;transition:.2s;}
+.rki:hover{background:rgba(33,150,243,.08);border-color:var(--bm);}
+.rkn{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;min-width:25px;text-align:center;}
+.rk1{color:var(--gold);text-shadow:0 0 10px rgba(245,200,66,.5);}
+.rk2{color:var(--sv);}
+.rk3{color:#cd7f32;}
+.rksc{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:var(--bg2);text-align:right;}
+.pb{height:3px;background:rgba(33,150,243,.1);border-radius:2px;margin-top:4px;overflow:hidden;}
+.pbf{height:100%;border-radius:2px;transition:width 1s ease;}
+
+/* charts */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+@media(max-width:550px){.cg{grid-template-columns:1fr;}}
+.cb{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);border-radius:11px;padding:14px;position:relative;overflow:hidden;}
+.cb::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--bb),transparent);}
+.ct{font-size:9px;letter-spacing:1.5px;color:var(--ts);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+
+/* radar */
+.rdrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;}
+.rdcard{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--br);border-radius:11px;padding:13px;}
+.rdh{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+
+/* heatmap */
+.hmg{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;}
+.hmc{aspect-ratio:1;border-radius:5px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;cursor:default;border:1px solid rgba(255,255,255,.03);}
+.hmn{font-weight:700;font-size:10px;}
+.hma{font-size:8px;opacity:.8;}
+
+/* gallery */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:7px;}
+.gi{aspect-ratio:1;border-radius:8px;border:1px solid var(--br);background:rgba(13,58,92,.4);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  position:relative;cursor:pointer;transition:.2s;}
+.gi:active{border-color:var(--bg2);transform:scale(1.04);}
+.gc{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.82));padding:5px 3px 3px;font-size:8px;color:var(--ts);text-align:center;}
+
+/* ═══ TOAST ═══ */
+#toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:linear-gradient(135deg,#0d3a5c,#1565a8);border:1px solid var(--bg2);
+  border-radius:22px;padding:9px 20px;font-size:12px;color:var(--bg2);
+  box-shadow:0 8px 28px rgba(0,0,0,.6),var(--glow);z-index:999;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ═══ MODAL ═══ */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;
+  align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);}
+.mo.open{display:flex;animation:slideUp .3s ease;}
+@keyframes slideUp{from{opacity:0;}to{opacity:1;}}
+.mob{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--br);
+  border-radius:16px 16px 0 0;padding:20px 16px 32px;
+  width:100%;max-width:500px;max-height:88vh;overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,.8);}
+@media(min-width:520px){
+  .mo{align-items:center;}
+  .mob{border-radius:16px;max-height:80vh;padding:20px;}
+}
+.mob-handle{width:36px;height:4px;border-radius:2px;background:var(--br);margin:0 auto 16px;}
+.mot{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--bg2);margin-bottom:14px;letter-spacing:2px;}
+.moc{float:right;background:none;border:none;color:var(--ts);font-size:20px;cursor:pointer;line-height:1;padding:4px;margin-top:-4px;}
+
+/* add player modal */
+.cp-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px;}
+.cp-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s;flex-shrink:0;}
+.cp-dot.sel{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.4);}
+
+/* confirm modal */
+.conf-ico{font-size:44px;text-align:center;margin:8px 0 12px;}
+.conf-msg{font-size:14px;text-align:center;color:var(--ts);line-height:1.6;margin-bottom:16px;}
+
+/* ═══ MOBILE NAV ═══ */
+.mnav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(7,24,40,.98);
+  border-top:1px solid var(--br);z-index:200;backdrop-filter:blur(12px);
+  padding-bottom:env(safe-area-inset-bottom);}
+@media(max-width:640px){.mnav{display:flex;}}
+.mnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 2px 5px;border:none;background:transparent;color:var(--ts);
+  font-family:'Noto Sans JP',sans-serif;font-size:9px;cursor:pointer;transition:.2s;min-height:var(--tap);}
+.mnb.on{color:var(--bg2);}
+.mnb.on .mni{filter:drop-shadow(0 0 4px var(--bg2));}
+.mni{font-size:20px;line-height:1;}
+
+/* ═══ MISC ═══ */
+.dv{height:1px;background:linear-gradient(90deg,transparent,var(--br),transparent);margin:12px 0;}
+.tg{display:inline-block;padding:2px 6px;border-radius:4px;font-size:8px;letter-spacing:.5px;text-transform:uppercase;}
+.tgb{background:rgba(33,150,243,.15);color:var(--bb);border:1px solid rgba(33,150,243,.3);}
+.tgg{background:rgba(0,230,118,.15);color:var(--gr);border:1px solid rgba(0,230,118,.3);}
+.tgo{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
+.tgr{background:rgba(255,82,82,.15);color:var(--rd);border:1px solid rgba(255,82,82,.3);}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px;}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="logo-ic">⛳</div>
+  <div><div class="logo-tx">GOLF COMP</div><div class="logo-sb">Dashboard</div></div>
+  <div class="hdr-r">
+    <button class="hpill" id="hp1" onclick="goPg('p1')">📋情報</button>
+    <button class="hpill" id="hp2" onclick="goPg('p2')">🏌️スコア</button>
+    <button class="hpill" id="hp4" onclick="goPg('p4')">📊結果</button>
+    <span class="pulse"></span>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="si on" id="s1" onclick="goPg('p1')"><div class="sd" id="d1"></div><div class="sl"><strong>① 大会情報</strong><span>コンペ基本情報</span></div></div>
+    <div class="si" id="s2" onclick="goPg('p2')"><div class="sd" id="d2"></div><div class="sl"><strong>② スコア入力</strong><span>18H・参加者管理</span></div></div>
+    <div class="si" id="s3" onclick="goPg('p3')"><div class="sd" id="d3"></div><div class="sl"><strong>③ メディア</strong><span>写真・動画</span></div></div>
+    <div class="sdiv"></div>
+    <div class="si" id="s4" onclick="goPg('p4')"><div class="sd" id="d4"></div><div class="sl"><strong>📊 結果表示</strong><span>リアルタイム集計</span></div></div>
+    <div class="sdiv"></div>
+    <div class="sfoot">
+      <div class="lbl">参加者数</div><div class="val" id="sbm">0名</div>
+      <div class="lbl">入力状況</div><div class="val" id="sbs">未入力</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="cnt">
+
+    <!-- ── PAGE 1: 大会情報 ── -->
+    <div class="page on" id="p1"><div class="wrap">
+
+      <!-- progress indicator -->
+      <div class="prog-wrap">
+        <div class="prog-steps">
+          <div class="prog-step on" id="ps1" onclick="goPg('p1')">
+            <div class="prog-dot">1</div>
+            <div class="prog-lbl">大会情報</div>
+          </div>
+          <div class="prog-line" id="pl1"></div>
+          <div class="prog-step" id="ps2" onclick="goPg('p2')">
+            <div class="prog-dot">2</div>
+            <div class="prog-lbl">スコア</div>
+          </div>
+          <div class="prog-line" id="pl2"></div>
+          <div class="prog-step" id="ps3" onclick="goPg('p3')">
+            <div class="prog-dot">3</div>
+            <div class="prog-lbl">メディア</div>
+          </div>
+          <div class="prog-line" id="pl3"></div>
+          <div class="prog-step" id="ps4" onclick="goPg('p4')">
+            <div class="prog-dot" style="font-size:11px">📊</div>
+            <div class="prog-lbl">結果</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">📋 大会情報入力</div>
+      <div class="card">
+        <div class="ct" style="margin-bottom:12px"><span>🏆</span>大会基本情報</div>
+        <div class="g2">
+          <div class="fg">
+            <label>大会名 <span style="color:var(--rd)">*</span></label>
+            <input type="text" id="f-title" placeholder="例: 第12回 春季親睦コンペ" inputmode="text">
+            <span class="em" id="e-title">大会名を入力してください</span>
+          </div>
+          <div class="fg">
+            <label>開催日 <span style="color:var(--rd)">*</span></label>
+            <input type="date" id="f-date">
+            <span class="em" id="e-date">開催日を選択してください</span>
+          </div>
+          <div class="fg">
+            <label>コース名 <span style="color:var(--rd)">*</span></label>
+            <input type="text" id="f-course" placeholder="例: 皇太子記念GC" inputmode="text">
+            <span class="em" id="e-course">コース名を入力してください</span>
+          </div>
+          <div class="fg">
+            <label>コースレート / パー</label>
+            <input type="text" id="f-par" value="71.8 / Par72">
+          </div>
+          <div class="fg">
+            <label>天候</label>
+            <select id="f-weather">
+              <option>☀️ 晴れ</option><option>⛅ 曇り</option>
+              <option>🌧 雨</option><option>🌬 強風</option><option>❄️ 冬晴れ</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>競技方式</label>
+            <select id="f-format">
+              <option>ストロークプレー（ネット）</option>
+              <option>ストロークプレー（グロス）</option>
+              <option>ダブルペリア方式</option>
+              <option>マッチプレー</option>
+            </select>
+          </div>
+          <div class="fg" style="grid-column:1/-1">
+            <label>メモ・特記事項</label>
+            <textarea id="f-memo" placeholder="当日の状況や特記事項を入力..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="brow">
+        <button class="btn bg0" onclick="valInfo()">スコア入力へ進む →</button>
+      </div>
+    </div></div>
+
+    <!-- ── PAGE 2: スコア入力 ── -->
+    <div class="page" id="p2"><div class="wrap">
+
+      <div class="prog-wrap">
+        <div class="prog-steps">
+          <div class="prog-step done" id="ps1b" onclick="goPg('p1')"><div class="prog-dot">✓</div><div class="prog-lbl">大会情報</div></div>
+          <div class="prog-line done" id="pl1b"></div>
+          <div class="prog-step on" id="ps2b"><div class="prog-dot">2</div><div class="prog-lbl">スコア</div></div>
+          <div class="prog-line" id="pl2b"></div>
+          <div class="prog-step" id="ps3b" onclick="goPg('p3')"><div class="prog-dot">3</div><div class="prog-lbl">メディア</div></div>
+          <div class="prog-line" id="pl3b"></div>
+          <div class="prog-step" id="ps4b" onclick="goRes()"><div class="prog-dot" style="font-size:11px">📊</div><div class="prog-lbl">結果</div></div>
+        </div>
+      </div>
+
+      <div class="sec">🏌️ スコア入力</div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;margin-bottom:12px;gap:8px;">
+          <div class="ct" style="margin:0;flex:1;"><span>👥</span>参加者 <span id="pcnt" style="font-size:12px;margin-left:4px;color:var(--bg2);">0名</span></div>
+          <div id="all-status" style="font-size:10px;color:var(--ts);">入力状況: —</div>
+        </div>
+        <div class="plist" id="plist">
+          <div style="text-align:center;color:var(--ts);font-size:13px;padding:20px;">
+            ＋ 参加者を追加してください
+          </div>
+        </div>
+        <div class="dv"></div>
+        <div class="apb" onclick="openAddMo()" id="apb-btn">
+          <span style="font-size:22px;">➕</span>
+          <span>参加者を追加する</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--ts);" id="apb-hint">最大8名</span>
+        </div>
+      </div>
+
+      <div class="brow">
+        <button class="btn bgh" onclick="goPg('p1')">← 戻る</button>
+        <button class="btn bp" onclick="goPg('p3')">メディアへ →</button>
+        <button class="btn bg0" onclick="goRes()">📊 結果を見る →</button>
+      </div>
+    </div></div>
+
+    <!-- ── PAGE 3: メディア ── -->
+    <div class="page" id="p3"><div class="wrap">
+
+      <div class="prog-wrap">
+        <div class="prog-steps">
+          <div class="prog-step done" onclick="goPg('p1')"><div class="prog-dot">✓</div><div class="prog-lbl">大会情報</div></div>
+          <div class="prog-line done"></div>
+          <div class="prog-step done" onclick="goPg('p2')"><div class="prog-dot">✓</div><div class="prog-lbl">スコア</div></div>
+          <div class="prog-line done"></div>
+          <div class="prog-step on"><div class="prog-dot">3</div><div class="prog-lbl">メディア</div></div>
+          <div class="prog-line"></div>
+          <div class="prog-step" onclick="goRes()"><div class="prog-dot" style="font-size:11px">📊</div><div class="prog-lbl">結果</div></div>
+        </div>
+      </div>
+
+      <div class="sec">📸 メディア管理</div>
+      <div class="card">
+        <div class="ct" style="margin-bottom:10px;"><span>📁</span>写真・動画アップロード</div>
+        <div class="upz" onclick="document.getElementById('fi').click()">
+          <div style="font-size:28px;">📁</div>
+          <div style="font-size:13px;color:var(--ts);">タップしてファイルを選択</div>
+          <div style="font-size:9px;color:rgba(120,166,200,.5);">JPEG / PNG / MP4 ・ 複数選択可</div>
+        </div>
+        <div class="umg" id="umg">
+          <div class="um" onclick="openMo('🏌️','ティーショット No.1')">🏌️<div class="uc">ティーショット</div></div>
+          <div class="um" onclick="openMo('🌅','朝のコース風景')">🌅<div class="uc">朝の風景</div></div>
+          <div class="um" onclick="openMo('🎯','ホールインワン！')">🎯<div class="uc">HIO！</div></div>
+          <div class="um" onclick="openMo('🏆','表彰式')">🏆<div class="uc">表彰式</div></div>
+          <div class="um" onclick="openMo('🎬','ハイライト動画')">🎬<div class="vb">▶</div><div class="uc">動画</div></div>
+          <div class="um" onclick="openMo('🍺','打ち上げ乾杯')">🍺<div class="uc">打ち上げ</div></div>
+        </div>
+        <input type="file" id="fi" style="display:none" accept="image/*,video/*" multiple onchange="hFiles(event)">
+      </div>
+      <div class="brow">
+        <button class="btn bgh" onclick="goPg('p2')">← 戻る</button>
+        <button class="btn bg0" onclick="goRes()">📊 結果サマリーを表示 →</button>
+      </div>
+    </div></div>
+
+    <!-- ── PAGE 4: 結果 ── -->
+    <div class="page" id="p4"><div class="wrap">
+      <div class="sband" id="resst"></div>
+      <div class="tbar">
+        <button class="tbtn on" onclick="swTab('tr',this)">🏅 順位</button>
+        <button class="tbtn" onclick="swTab('tan',this)">📈 分析</button>
+        <button class="tbtn" onclick="swTab('trd',this)">🎯 レーダー</button>
+        <button class="tbtn" onclick="swTab('tgal',this)">📸 写真</button>
+      </div>
+      <div id="tr">
+        <div class="sec">🏅 最終順位</div>
+        <div class="rklist" id="rklist"></div>
+        <div class="dv"></div>
+        <div class="sec">🕳️ ホール別ヒートマップ</div>
+        <div class="card">
+          <div class="hmg" id="hmg"></div>
+          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1a3a2a;"></span>バーディ以下</span>
+            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0d3a5c;"></span>パー</span>
+            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#5c2020;"></span>ボギー</span>
+            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7c1a1a;"></span>ダブル+</span>
+          </div>
+        </div>
+      </div>
+      <div id="tan" style="display:none;">
+        <div class="cg">
+          <div class="cb"><div class="ct"><span>🍩</span>スコア内訳</div><canvas id="ch-do" height="175"></canvas></div>
+          <div class="cb"><div class="ct"><span>📊</span>カテゴリ別比較</div><canvas id="ch-bar" height="175"></canvas></div>
+        </div>
+        <div class="cb" style="margin-bottom:10px;"><div class="ct"><span>🕳️</span>ホール別平均（対パー）</div><canvas id="ch-hole" height="130"></canvas></div>
+        <div class="cb"><div class="ct"><span>📉</span>グロス vs ネット</div><canvas id="ch-gvn" height="155"></canvas></div>
+      </div>
+      <div id="trd" style="display:none;">
+        <div class="sec">🎯 プレーヤー評価レーダー</div>
+        <div style="font-size:9px;color:var(--ts);margin-bottom:10px;">パット数・OB・バンカー・FW率・リカバリーを5段階評価</div>
+        <div class="rdrow" id="rdrow"></div>
+      </div>
+      <div id="tgal" style="display:none;">
+        <div class="sec">📸 フォトギャラリー</div>
+        <div class="gal" id="galg"></div>
+      </div>
+      <div class="dv"></div>
+      <div class="brow"><button class="btn bgh" onclick="goPg('p2')">← スコアを編集</button></div>
+    </div></div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ MOBILE NAV ═══ -->
+<div class="mnav">
+  <button class="mnb on" id="mb1" onclick="goPg('p1')"><span class="mni">📋</span>情報</button>
+  <button class="mnb" id="mb2" onclick="goPg('p2')"><span class="mni">🏌️</span>スコア</button>
+  <button class="mnb" id="mb3" onclick="goPg('p3')"><span class="mni">📸</span>写真</button>
+  <button class="mnb" id="mb4" onclick="goPg('p4')"><span class="mni">📊</span>結果</button>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast">✅ 保存しました</div>
+
+<!-- ═══ MEDIA MODAL ═══ -->
+<div class="mo" id="moMedia" onclick="if(event.target===this)closeMo('moMedia')">
+  <div class="mob">
+    <div class="mob-handle"></div>
+    <button class="moc" onclick="closeMo('moMedia')">✕</button>
+    <div class="mot" id="mmot">メディアビュアー</div>
+    <div style="text-align:center;font-size:72px;padding:14px;" id="mmoc"></div>
+    <div style="text-align:center;font-size:12px;color:var(--ts);" id="mmos"></div>
+  </div>
+</div>
+
+<!-- ═══ ADD PLAYER MODAL ═══ -->
+<div class="mo" id="moAdd" onclick="if(event.target===this)closeMo('moAdd')">
+  <div class="mob">
+    <div class="mob-handle"></div>
+    <button class="moc" onclick="closeMo('moAdd')">✕</button>
+    <div class="mot">👤 参加者を追加</div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div class="fg">
+        <label>氏名 <span style="color:var(--rd)">*</span></label>
+        <input type="text" id="nn" placeholder="例: 山田 太郎" inputmode="text">
+        <span class="em" id="e-nn">氏名を入力してください</span>
+      </div>
+      <div class="fg">
+        <label>ハンディキャップ <span style="color:var(--ts);font-size:8px;">(0〜54)</span></label>
+        <input type="number" id="nh" placeholder="例: 18" min="0" max="54" inputmode="numeric">
+        <span class="em" id="e-nh">0〜54の数値を入力してください</span>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:14px;">
+      <label>アバターカラー</label>
+      <div class="cp-row" id="cpick"></div>
+    </div>
+    <!-- preview -->
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(13,58,92,.3);border-radius:8px;border:1px solid var(--br);margin-bottom:14px;" id="add-preview">
+      <div class="av" id="prev-av" style="width:40px;height:40px;font-size:13px;">—</div>
+      <div>
+        <div id="prev-name" style="font-size:14px;font-weight:600;color:var(--tx);">—</div>
+        <div id="prev-hcp" style="font-size:10px;color:var(--ts);">HCP —</div>
+      </div>
+    </div>
+    <div class="brow" style="margin-top:0;">
+      <button class="btn bgh" style="font-size:12px;" onclick="closeMo('moAdd')">キャンセル</button>
+      <button class="btn bp" style="font-size:12px;" onclick="doAdd()">追加する ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM DELETE MODAL ═══ -->
+<div class="mo" id="moConf" onclick="if(event.target===this)closeMo('moConf')">
+  <div class="mob">
+    <div class="mob-handle"></div>
+    <div class="conf-ico">🗑️</div>
+    <div class="conf-msg" id="conf-msg">この参加者を削除しますか？<br>入力したスコアも削除されます。</div>
+    <div class="brow" style="justify-content:center;">
+      <button class="btn bgh" onclick="closeMo('moConf')">キャンセル</button>
+      <button class="btn bdn" style="height:var(--tap);padding:0 18px;font-size:13px;" id="conf-ok">削除する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONSTANTS & STATE
+// ═══════════════════════════════════════════════
+Chart.defaults.color='#78a6c8';
+Chart.defaults.borderColor='rgba(33,150,243,0.12)';
+Chart.defaults.font.family="'Noto Sans JP',sans-serif";
+
+const PARS=[4,5,3,4,4,5,3,4,4, 4,3,5,4,4,3,5,4,4];
+const PAR_TOTAL=PARS.reduce((a,b)=>a+b,0); // 72
+const PAR_OUT=PARS.slice(0,9).reduce((a,b)=>a+b,0); // 36
+const PAR_IN =PARS.slice(9).reduce((a,b)=>a+b,0);   // 36
+const MAX_SCORE=15; // 1ホール最大スコア
+const MIN_SCORE=1;
+const MAX_PLAYERS=8;
+const COLORS=['#2196f3','#f5c842','#00e676','#ff5252','#ce93d8','#ff9800','#4dd0e1','#aed581'];
+
+let selCol=COLORS[0];
+let players=[];
+let charts={};
+let resBuilt=false;
+let pendingDelId=null;
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+window.onload=()=>{
+  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+  buildCPick();
+  // live preview on add modal
+  document.getElementById('nn').addEventListener('input',updatePreview);
+  document.getElementById('nh').addEventListener('input',updatePreview);
+};
+
+// ═══════════════════════════════════════════════
+//  PAGE NAVIGATION
+// ═══════════════════════════════════════════════
+const PGS=['p1','p2','p3','p4'];
+const SBS=['s1','s2','s3','s4'];
+const MBS=['mb1','mb2','mb3','mb4'];
+const HPS=['hp1','hp2',null,'hp4'];
+
+function goPg(id){
+  PGS.forEach(p=>document.getElementById(p).classList.remove('on'));
+  SBS.forEach(s=>document.getElementById(s).classList.remove('on'));
+  MBS.forEach(m=>document.getElementById(m).classList.remove('on'));
+  HPS.forEach(h=>{if(h)document.getElementById(h).classList.remove('on');});
+
+  document.getElementById(id).classList.add('on');
+  const i=PGS.indexOf(id);
+  if(i>=0){
+    document.getElementById(SBS[i]).classList.add('on');
+    document.getElementById(MBS[i]).classList.add('on');
+    if(HPS[i])document.getElementById(HPS[i]).classList.add('on');
+  }
+  document.getElementById('cnt').scrollTop=0;
+  if(id==='p4')buildRes();
+}
+
+// ═══════════════════════════════════════════════
+//  PAGE 1: VALIDATION
+// ═══════════════════════════════════════════════
+function valInfo(){
+  let ok=true;
+  const checks=[
+    ['f-title','e-title','大会名を入力してください'],
+    ['f-date','e-date','開催日を選択してください'],
+    ['f-course','e-course','コース名を入力してください'],
+  ];
+  checks.forEach(([fid,eid,msg])=>{
+    const el=document.getElementById(fid);
+    const em=document.getElementById(eid);
+    if(!el.value.trim()){
+      el.classList.add('err');
+      em.textContent=msg;em.style.display='block';
+      ok=false;
+    } else {
+      el.classList.remove('err');
+      em.style.display='none';
+    }
+  });
+  if(!ok){toast('⚠️ 必須項目を入力してください');return;}
+  markStep(1,true);
+  toast('✅ 大会情報を保存しました');
+  goPg('p2');
+}
+
+function markStep(n,done){
+  document.getElementById('d'+n).style.background=done?'var(--gr)':'';
+  document.getElementById('s'+n).classList.toggle('done',done);
+}
+
+// ═══════════════════════════════════════════════
+//  ADD PLAYER
+// ═══════════════════════════════════════════════
+function buildCPick(){
+  const w=document.getElementById('cpick');
+  w.innerHTML=COLORS.map(c=>`<div class="cp-dot" id="cp${c.slice(1)}" style="background:${c}" onclick="selClr('${c}')"></div>`).join('');
+  hiClr(COLORS[0]);
+}
+function selClr(c){selCol=c;hiClr(c);updatePreview();}
+function hiClr(c){
+  COLORS.forEach(cl=>{
+    const e=document.getElementById('cp'+cl.slice(1));
+    if(e)e.classList.toggle('sel',cl===c);
+  });
+}
+function getInits(n){
+  const p=n.trim().split(/\s+/);
+  return p.length>=2?p[0][0]+p[1][0]:n.trim().slice(0,2).toUpperCase();
+}
+function updatePreview(){
+  const name=document.getElementById('nn').value.trim();
+  const hcp=document.getElementById('nh').value;
+  const av=document.getElementById('prev-av');
+  const nm=document.getElementById('prev-name');
+  const hc=document.getElementById('prev-hcp');
+  av.textContent=name?getInits(name):'—';
+  av.style.color=selCol;av.style.borderColor=selCol;
+  nm.textContent=name||'—';
+  hc.textContent='HCP '+(hcp||'—');
+}
+
+function openAddMo(){
+  if(players.length>=MAX_PLAYERS){toast(`⚠️ 参加者は最大${MAX_PLAYERS}名までです`);return;}
+  const c=COLORS[players.length%COLORS.length];
+  selClr(c);
+  document.getElementById('nn').value='';
+  document.getElementById('nh').value='';
+  document.getElementById('e-nn').style.display='none';
+  document.getElementById('e-nh').style.display='none';
+  document.getElementById('nn').classList.remove('err');
+  document.getElementById('nh').classList.remove('err');
+  updatePreview();
+  openMo('moAdd');
+  setTimeout(()=>document.getElementById('nn').focus(),200);
+}
+
+function doAdd(){
+  const nn=document.getElementById('nn'),nh=document.getElementById('nh');
+  const name=nn.value.trim();
+  const hcp=parseInt(nh.value);
+  let ok=true;
+  // validate name
+  if(!name){
+    nn.classList.add('err');
+    document.getElementById('e-nn').style.display='block';ok=false;
+  } else {nn.classList.remove('err');document.getElementById('e-nn').style.display='none';}
+  // validate hcp
+  if(nh.value===''||isNaN(hcp)||hcp<0||hcp>54){
+    nh.classList.add('err');
+    document.getElementById('e-nh').style.display='block';ok=false;
+  } else {nh.classList.remove('err');document.getElementById('e-nh').style.display='none';}
+  if(!ok){toast('⚠️ 入力内容を確認してください');return;}
+
+  players.push({
+    id:Date.now(),name,init:getInits(name),color:selCol,hcp,
+    holes:Array(18).fill(''),
+    putt:Math.floor(Math.random()*8)+27,
+    ob:Math.floor(Math.random()*3),
+    bunker:Math.floor(Math.random()*5)+1,
+    fw:Math.floor(Math.random()*30)+45,
+  });
+
+  renderPList();updSb();resBuilt=false;
+  closeMo('moAdd');
+  toast(`✅ ${name} を追加しました`);
+  // auto-open new player's score panel
+  setTimeout(()=>{
+    const last=players[players.length-1];
+    const row=document.getElementById('pr'+last.id);
+    if(row)row.classList.add('open');
+    document.getElementById('cnt').scrollTo({top:document.getElementById('cnt').scrollHeight,behavior:'smooth'});
+  },200);
+}
+
+// ═══════════════════════════════════════════════
+//  DELETE PLAYER (with confirm)
+// ═══════════════════════════════════════════════
+function askDel(id){
+  const p=players.find(x=>x.id===id);
+  if(!p)return;
+  pendingDelId=id;
+  document.getElementById('conf-msg').innerHTML=`<strong style="color:var(--tx)">${p.name}</strong> を削除しますか？<br><span style="font-size:12px;">入力したスコアも削除されます。</span>`;
+  document.getElementById('conf-ok').onclick=()=>{doDelPlayer();};
+  openMo('moConf');
+}
+function doDelPlayer(){
+  if(!pendingDelId)return;
+  const p=players.find(x=>x.id===pendingDelId);
+  players=players.filter(x=>x.id!==pendingDelId);
+  pendingDelId=null;
+  renderPList();updSb();resBuilt=false;
+  closeMo('moConf');
+  toast(`🗑️ ${p?p.name:'参加者'} を削除しました`);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER PLAYER LIST
+// ═══════════════════════════════════════════════
+function renderPList(){
+  const w=document.getElementById('plist');
+  document.getElementById('pcnt').textContent=players.length+'名';
+  // update add button hint
+  const hint=document.getElementById('apb-hint');
+  hint.textContent=players.length>=MAX_PLAYERS?'上限に達しました':`残り${MAX_PLAYERS-players.length}名`;
+  if(players.length>=MAX_PLAYERS)hint.style.color='var(--rd)';
+  else hint.style.color='var(--ts)';
+
+  if(!players.length){
+    w.innerHTML='<div style="text-align:center;color:var(--ts);font-size:13px;padding:20px 0;">＋ 参加者を追加してください</div>';
+    return;
+  }
+
+  w.innerHTML=players.map(p=>{
+    const g=calcGross(p),net=g>0?g-p.hcp:0;
+    const fc=p.holes.filter(v=>v!=='').length;
+    const stCls=fc===18?'ok':fc>0?'wip':'';
+    const stTxt=fc===18?'✅ 完了':fc>0?`${fc}/18H`:'未入力';
+    return `
+    <div class="pcard" id="pr${p.id}">
+      <div class="pcard-head" onclick="togP(${p.id})">
+        <div class="av" style="color:${p.color};border-color:${p.color};">${p.init}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="pname">${p.name}</div>
+          <div class="phcp">HCP ${p.hcp}</div>
+        </div>
+        <div style="text-align:right;margin-right:8px;">
+          ${g>0?`<div class="pgross">${g}</div><div class="pnet-lbl">NET ${net}</div>`:`<span class="vbadge ${stCls}">${stTxt}</span>`}
+        </div>
+        <div class="pchev">›</div>
+      </div>
+      <div class="pbody">
+        <!-- OUT -->
+        <div class="sc-section">
+          <div class="sc-section-lbl">OUT</div>
+          <div class="sc-section-line"></div>
+          <div class="sc-section-tot" id="out${p.id}" style="color:var(--bb);">—<span style="font-size:9px;color:var(--ts);"> /36</span></div>
+        </div>
+        <div class="sc-grid">
+          ${[0,1,2,3,4,5,6,7,8].map(i=>`
+          <div class="sc-cell">
+            <div class="sc-hl">${i+1}</div>
+            <div class="sc-par">P${PARS[i]}</div>
+            <input class="sc-inp" type="number" min="${MIN_SCORE}" max="${MAX_SCORE}"
+              id="h${p.id}_${i}" value="${p.holes[i]||''}"
+              inputmode="numeric"
+              onchange="onH(${p.id},${i},this.value)"
+              oninput="clrH(this,${PARS[i]})"
+              onfocus="this.select()">
+            <div class="sc-pm">
+              <div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div>
+              <div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>
+            </div>
+          </div>`).join('')}
+        </div>
+
+        <!-- IN -->
+        <div class="sc-section" style="margin-top:10px;">
+          <div class="sc-section-lbl">IN</div>
+          <div class="sc-section-line"></div>
+          <div class="sc-section-tot" id="in${p.id}" style="color:var(--bb);">—<span style="font-size:9px;color:var(--ts);"> /36</span></div>
+        </div>
+        <div class="sc-grid">
+          ${[9,10,11,12,13,14,15,16,17].map(i=>`
+          <div class="sc-cell">
+            <div class="sc-hl">${i+1}</div>
+            <div class="sc-par">P${PARS[i]}</div>
+            <input class="sc-inp" type="number" min="${MIN_SCORE}" max="${MAX_SCORE}"
+              id="h${p.id}_${i}" value="${p.holes[i]||''}"
+              inputmode="numeric"
+              onchange="onH(${p.id},${i},this.value)"
+              oninput="clrH(this,${PARS[i]})"
+              onfocus="this.select()">
+            <div class="sc-pm">
+              <div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div>
+              <div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>
+            </div>
+          </div>`).join('')}
+        </div>
+
+        <!-- totals -->
+        <div class="mst">
+          <div class="ms"><div class="mv" id="mg${p.id}">—</div><div class="ml">グロス</div></div>
+          <div class="ms"><div class="mv" id="mn${p.id}">—</div><div class="ml">ネット</div></div>
+          <div class="ms"><div class="mv" id="md${p.id}">—</div><div class="ml">対パー</div></div>
+          <div class="ms"><div class="mv" id="mv${p.id}" style="font-size:10px;color:var(--ts);">${stTxt}</div><div class="ml">入力状況</div></div>
+        </div>
+
+        <div class="dv"></div>
+        <div style="font-size:9px;color:var(--ts);letter-spacing:1px;margin-bottom:8px;">▸ 追加スタッツ（タップで変更）</div>
+        <div class="xst-grid">
+          <div>
+            <div class="xst-row" style="margin-bottom:10px;">
+              <span class="xst-label">🏌️ パット数</span>
+              <div class="xst-stepper">
+                <div class="xst-btn" onclick="adjSt(${p.id},'putt',-1)">−</div>
+                <div class="xst-val" id="xp${p.id}">${p.putt}</div>
+                <div class="xst-btn" onclick="adjSt(${p.id},'putt',+1)">＋</div>
+                <span style="font-size:9px;color:var(--ts);margin-left:3px;">回</span>
+              </div>
+            </div>
+            <div class="xst-row">
+              <span class="xst-label">⚠️ OB数</span>
+              <div class="xst-stepper">
+                <div class="xst-btn" onclick="adjSt(${p.id},'ob',-1)">−</div>
+                <div class="xst-val" id="xo${p.id}">${p.ob}</div>
+                <div class="xst-btn" onclick="adjSt(${p.id},'ob',+1)">＋</div>
+                <span style="font-size:9px;color:var(--ts);margin-left:3px;">回</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="xst-row" style="margin-bottom:10px;">
+              <span class="xst-label">🏖️ バンカー</span>
+              <div class="xst-stepper">
+                <div class="xst-btn" onclick="adjSt(${p.id},'bunker',-1)">−</div>
+                <div class="xst-val" id="xb${p.id}">${p.bunker}</div>
+                <div class="xst-btn" onclick="adjSt(${p.id},'bunker',+1)">＋</div>
+                <span style="font-size:9px;color:var(--ts);margin-left:3px;">回</span>
+              </div>
+            </div>
+            <div class="xst-row">
+              <span class="xst-label">🌿 FW率</span>
+              <div class="xst-stepper">
+                <div class="xst-btn" onclick="adjSt(${p.id},'fw',-5)">−</div>
+                <div class="xst-val" id="xf${p.id}">${p.fw}</div>
+                <div class="xst-btn" onclick="adjSt(${p.id},'fw',+5)">＋</div>
+                <span style="font-size:9px;color:var(--ts);margin-left:3px;">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- delete -->
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+          <button class="btn bdn" onclick="askDel(${p.id})">🗑️ 削除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // reapply colors for existing values
+  players.forEach(p=>{
+    p.holes.forEach((v,i)=>{if(v!==''){const e=document.getElementById(`h${p.id}_${i}`);if(e)clrH(e,PARS[i]);}});
+    recalc(p.id);
+  });
+}
+
+function togP(id){
+  document.getElementById('pr'+id).classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════
+//  SCORE INPUT & VALIDATION
+// ═══════════════════════════════════════════════
+function clrH(inp,par){
+  const v=parseInt(inp.value);
+  inp.className='sc-inp';
+  if(!v||isNaN(v))return;
+  // out-of-range
+  if(v<MIN_SCORE||v>MAX_SCORE){inp.classList.add('err-val');return;}
+  if(v<=par-2)inp.classList.add('eagle');
+  else if(v===par-1)inp.classList.add('birdie');
+  else if(v===par){}
+  else if(v===par+1)inp.classList.add('bogey');
+  else inp.classList.add('dbogey');
+}
+
+function onH(pid,hi,val){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  const v=val===''?'':(parseInt(val)||'');
+  // validate range
+  if(v!==''&&(v<MIN_SCORE||v>MAX_SCORE)){
+    const inp=document.getElementById(`h${pid}_${hi}`);
+    if(inp){inp.classList.add('err-val');inp.value='';}
+    toast(`⚠️ スコアは${MIN_SCORE}〜${MAX_SCORE}の間で入力してください`);
+    p.holes[hi]='';
+  } else {
+    p.holes[hi]=v;
+  }
+  recalc(pid);resBuilt=false;updSb();
+}
+
+function adjH(pid,hi,delta){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  const cur=p.holes[hi]===''?PARS[hi]:Number(p.holes[hi]);
+  const nv=Math.max(MIN_SCORE,Math.min(MAX_SCORE,cur+delta));
+  p.holes[hi]=nv;
+  const inp=document.getElementById(`h${pid}_${hi}`);
+  if(inp){inp.value=nv;clrH(inp,PARS[hi]);}
+  recalc(pid);resBuilt=false;updSb();
+}
+
+function adjSt(pid,key,delta){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  const limits={putt:[18,60],ob:[0,20],bunker:[0,20],fw:[0,100]};
+  const [mn,mx]=limits[key];
+  p[key]=Math.max(mn,Math.min(mx,(p[key]||0)+delta));
+  const prefMap={putt:'xp',ob:'xo',bunker:'xb',fw:'xf'};
+  const el=document.getElementById(prefMap[key]+pid);
+  if(el)el.textContent=p[key];
+  resBuilt=false;
+}
+
+function calcGross(p){
+  const filled=p.holes.filter(v=>v!==''&&Number(v)>0);
+  return filled.reduce((a,b)=>a+Number(b),0);
+}
+
+function recalc(pid){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  const out=[0,1,2,3,4,5,6,7,8].reduce((a,i)=>a+(Number(p.holes[i])||0),0);
+  const ins=[9,10,11,12,13,14,15,16,17].reduce((a,i)=>a+(Number(p.holes[i])||0),0);
+  const g=out+ins;
+  const fc=p.holes.filter(v=>v!=='').length;
+  p.gross=g;p.net=g>0?g-p.hcp:0;
+
+  const $=id=>{const e=document.getElementById(id);return e;};
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+
+  // OUT / IN subtotals
+  const outEl=$(`out${pid}`);
+  if(outEl)outEl.innerHTML=`${out||'—'}<span style="font-size:9px;color:var(--ts);"> /36</span>`;
+  const inEl=$(`in${pid}`);
+  if(inEl)inEl.innerHTML=`${ins||'—'}<span style="font-size:9px;color:var(--ts);"> /36</span>`;
+
+  set(`mg${pid}`,g||'—');
+  set(`mn${pid}`,g>0?p.net:'—');
+  const diff=g-PAR_TOTAL;
+  set(`md${pid}`,g>0?(diff>=0?'+':'')+diff:'—');
+
+  const mv=$(`mv${pid}`);
+  if(mv){
+    if(fc===18){mv.textContent='✅ 完了';mv.style.color='var(--gr)';}
+    else if(fc>0){mv.textContent=`${fc}/18H`;mv.style.color='var(--gold)';}
+    else{mv.textContent='未入力';mv.style.color='var(--ts)';}
+  }
+  // update pcard-head
+  const head=document.querySelector(`#pr${pid} .pcard-head`);
+  if(head){
+    const scoreDiv=head.querySelector('div:nth-child(3)');
+    if(scoreDiv){
+      if(g>0){
+        scoreDiv.innerHTML=`<div class="pgross">${g}</div><div class="pnet-lbl">NET ${p.net}</div>`;
+      } else {
+        const stCls=fc>0?'wip':'';
+        const stTxt=fc>0?`${fc}/18H`:'未入力';
+        scoreDiv.innerHTML=`<span class="vbadge ${stCls}">${stTxt}</span>`;
+      }
+    }
+  }
+}
+
+function updSb(){
+  document.getElementById('sbm').textContent=players.length+'名';
+  const done=players.filter(p=>p.holes.filter(v=>v!=='').length===18).length;
+  const txt=players.length===0?'未入力':done===players.length&&players.length>0?`全員完了 ✅`:`${done}/${players.length}名完了`;
+  document.getElementById('sbs').textContent=txt;
+  document.getElementById('all-status').textContent='入力状況: '+txt;
+  if(players.length>0){
+    document.getElementById('d2').style.background=done>0?'var(--bg2)':'';
+    document.getElementById('s2').classList.toggle('done',done===players.length&&players.length>0);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  GO TO RESULT
+// ═══════════════════════════════════════════════
+function goRes(){
+  if(!players.length){toast('⚠️ 参加者を追加してください');return;}
+  resBuilt=false;
+  goPg('p4');
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD RESULT PAGE
+// ═══════════════════════════════════════════════
+function buildRes(){
+  if(resBuilt)return;resBuilt=true;
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};
+  bStats();bRanking();bHeatmap();bCharts();bRadar();bGallery();
+}
+
+function bStats(){
+  const vp=players.filter(p=>p.gross>0);
+  const avg=vp.length?Math.round(vp.reduce((a,p)=>a+p.gross,0)/vp.length*10)/10:'—';
+  const best=vp.length?Math.min(...vp.map(p=>p.net)):'—';
+  const num=document.getElementById('f-title').value.match(/\d+/)?.[0]||'?';
+  document.getElementById('resst').innerHTML=`
+    <div class="sbc"><div class="sbic">🏆</div><div class="sbv">${num}</div><div class="sbl">第〇回</div></div>
+    <div class="sbc"><div class="sbic">👥</div><div class="sbv">${players.length}</div><div class="sbl">参加者</div></div>
+    <div class="sbc"><div class="sbic">⛳</div><div class="sbv">${avg}</div><div class="sbl">平均グロス</div></div>
+    <div class="sbc"><div class="sbic">🎯</div><div class="sbv">${best}</div><div class="sbl">最低ネット</div></div>`;
+}
+
+function bRanking(){
+  const sorted=[...players].sort((a,b)=>{
+    if(a.gross===0&&b.gross===0)return a.name.localeCompare(b.name);
+    if(a.gross===0)return 1;if(b.gross===0)return -1;
+    return a.net-b.net;
+  });
+  const md=['🥇','🥈','🥉'];
+  document.getElementById('rklist').innerHTML=sorted.map((p,i)=>{
+    const diff=p.gross>0?p.gross-PAR_TOTAL:null;
+    const bd=p.gross>0?p.holes.filter((v,hi)=>v!==''&&Number(v)<=PARS[hi]-1).length:0;
+    const rc=i===0?'rk1':i===1?'rk2':i===2?'rk3':'';
+    const bw=p.net>0?Math.max(8,100-(p.net-65)*3):8;
+    return`<div class="rki">
+      <div class="rkn ${rc}">${md[i]||i+1}</div>
+      <div class="av" style="color:${p.color};border-color:${p.color};width:36px;height:36px;font-size:11px;font-weight:700;flex-shrink:0;">${p.init}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;">${p.name}</div>
+        <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;">
+          <span style="font-size:9px;color:var(--ts);">HCP ${p.hcp}</span>
+          ${p.gross>0?`<span class="tg tgb">グロス ${p.gross}</span>`:''}
+          ${bd>0?`<span class="tg tgg">🐦${bd}B</span>`:''}
+          ${p.ob===0&&p.gross>0?'<span class="tg tgg">OBなし</span>':''}
+        </div>
+        <div class="pb"><div class="pbf" style="width:${bw}%;background:linear-gradient(90deg,${p.color}88,${p.color});"></div></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div class="rksc">${p.net>0?p.net:'—'}</div>
+        <div style="font-size:9px;color:var(--ts);">${diff!==null?(diff>=0?'+':'')+diff+' vs Par':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function bHeatmap(){
+  const fp=players.find(p=>p.gross>0);
+  document.getElementById('hmg').innerHTML=PARS.map((_,i)=>{
+    const s=fp?(Number(fp.holes[i])||PARS[i]+1):PARS[i]+1;
+    const d=s-PARS[i];
+    const bg=d<=-1?'#1a3a2a':d===0?'#0d3a5c':d===1?'#5c2020':'#7c1a1a';
+    return`<div class="hmc" style="background:${bg};"><div class="hmn">${i+1}</div><div class="hma">${d>=0?'+':''}${d}</div></div>`;
+  }).join('');
+}
+
+function bCharts(){
+  const vp=players.filter(p=>p.gross>0);
+  let eagle=0,birdie=0,par=0,bogey=0,dbl=0;
+  if(vp.length){
+    vp.forEach(p=>p.holes.forEach((v,i)=>{if(v==='')return;const d=Number(v)-PARS[i];if(d<=-2)eagle++;else if(d===-1)birdie++;else if(d===0)par++;else if(d===1)bogey++;else dbl++;}));
+  }else{eagle=3;birdie=8;par=35;bogey=42;dbl=12;}
+  charts.do=new Chart(document.getElementById('ch-do'),{type:'doughnut',data:{labels:['イーグル以下','バーディ','パー','ボギー','ダブル+'],datasets:[{data:[eagle,birdie,par,bogey,dbl],backgroundColor:['#00e676cc','#4caf50cc','#2196f3cc','#ff9800cc','#ff5252cc'],borderWidth:2,borderColor:'#020b18'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},cutout:'60%'}});
+
+  const bp=players.length>0?players.slice(0,8):[{init:'A',color:'#2196f3',putt:30,ob:1,bunker:3,fw:60}];
+  charts.bar=new Chart(document.getElementById('ch-bar'),{type:'bar',data:{labels:['パット','OB×5','バンカー×3','FW÷10'],datasets:bp.map(p=>({label:p.init,data:[p.putt,p.ob*5,p.bunker*3,Math.round(p.fw/10)],backgroundColor:p.color+'99',borderColor:p.color,borderWidth:1,borderRadius:4}))},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{grid:{color:'rgba(33,150,243,.1)'}},x:{grid:{color:'rgba(33,150,243,.06)'}}}}});
+
+  const ha=PARS.map((_par,i)=>{const sc=vp.map(p=>Number(p.holes[i])).filter(v=>v>0);return sc.length?sc.reduce((a,b)=>a+b,0)/sc.length:_par+1.2;});
+  charts.hole=new Chart(document.getElementById('ch-hole'),{type:'bar',data:{labels:Array.from({length:18},(_,i)=>`H${i+1}`),datasets:[{label:'平均',data:ha,backgroundColor:ha.map((v,i)=>v-PARS[i]<=0?'rgba(0,230,118,.6)':v-PARS[i]<=1?'rgba(33,150,243,.6)':v-PARS[i]<=2?'rgba(255,152,0,.6)':'rgba(255,82,82,.6)'),borderRadius:3},{label:'Par',data:PARS,type:'line',borderColor:'rgba(245,200,66,.7)',backgroundColor:'transparent',pointRadius:3,borderWidth:2,tension:.3}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{min:2,grid:{color:'rgba(33,150,243,.1)'}},x:{grid:{color:'rgba(33,150,243,.06)'}}}}});
+
+  const sp=[...players].sort((a,b)=>a.net-b.net);
+  charts.gvn=new Chart(document.getElementById('ch-gvn'),{type:'bar',data:{labels:sp.map(p=>p.init),datasets:[{label:'グロス',data:sp.map(p=>p.gross||0),backgroundColor:sp.map(p=>p.color+'66'),borderColor:sp.map(p=>p.color),borderWidth:2,borderRadius:4},{label:'ネット',data:sp.map(p=>p.net||0),backgroundColor:'rgba(0,200,255,.18)',borderColor:'var(--bg2)',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{min:55,grid:{color:'rgba(33,150,243,.1)'}},x:{grid:{color:'rgba(33,150,243,.06)'}}}}});
+}
+
+function bRadar(){
+  const w=document.getElementById('rdrow');
+  if(!players.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">参加者を追加してください</div>';return;}
+  const rl=['パット数','OB率','バンカー','FW率','リカバリー'];
+  w.innerHTML=players.map((p,i)=>`
+    <div class="rdcard">
+      <div class="rdh">
+        <div class="av" style="color:${p.color};border-color:${p.color};width:32px;height:32px;font-size:10px;">${p.init}</div>
+        <div><div style="font-size:13px;font-weight:700;">${p.name}</div><div style="font-size:9px;color:var(--ts);">HCP ${p.hcp}</div></div>
+        <div style="margin-left:auto;">${p.fw>=65?'<span class="tg tgg">上位</span>':p.fw>=50?'<span class="tg tgb">中級</span>':'<span class="tg tgr">要練習</span>'}</div>
+      </div>
+      <canvas id="rd${i}" height="170"></canvas>
+    </div>`).join('');
+  players.forEach((p,i)=>{
+    const sc=[
+      Math.max(1,Math.min(5,Math.round(5-(p.putt-28)/3))),
+      Math.max(1,Math.min(5,5-p.ob*1.5)),
+      Math.max(1,Math.min(5,5-p.bunker*0.5)),
+      Math.max(1,Math.min(5,Math.round(p.fw/20))),
+      Math.max(1,Math.min(5,3+Math.round((p.fw-50)/25)))
+    ].map(v=>Math.max(1,Math.min(5,Math.round(v))));
+    new Chart(document.getElementById('rd'+i),{type:'radar',data:{labels:rl,datasets:[{label:p.name,data:sc,backgroundColor:p.color+'33',borderColor:p.color,borderWidth:2,pointBackgroundColor:p.color,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{r:{min:0,max:5,ticks:{stepSize:1,display:false},grid:{color:'rgba(33,150,243,.2)'},angleLines:{color:'rgba(33,150,243,.2)'},pointLabels:{font:{size:9},color:'#78a6c8'}}}}});
+  });
+}
+
+function bGallery(){
+  const items=[
+    {e:'🏌️',l:'ティーショット',v:false},{e:'🌅',l:'朝の風景',v:false},
+    {e:'🎯',l:'HIO！',v:false},{e:'🏆',l:'表彰式',v:false},
+    {e:'🎬',l:'ハイライト動画',v:true},{e:'🍺',l:'打ち上げ',v:false},
+  ];
+  const w=document.getElementById('galg');if(!w)return;
+  w.innerHTML=items.map(it=>`<div class="gi" onclick="openMo('moMedia');document.getElementById('mmoc').textContent='${it.e}';document.getElementById('mmos').textContent='${it.l}'">${it.e}<div class="gc">${it.l}</div>${it.v?'<div class="vb">▶</div>':''}</div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  TAB SWITCH
+// ═══════════════════════════════════════════════
+function swTab(id,btn){
+  ['tr','tan','trd','tgal'].forEach(t=>{const e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none';});
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+}
+
+// ═══════════════════════════════════════════════
+//  MEDIA
+// ═══════════════════════════════════════════════
+function hFiles(e){
+  const files=Array.from(e.target.files),w=document.getElementById('umg');
+  files.forEach(f=>{
+    const d=document.createElement('div');d.className='um';
+    const ic=f.type.startsWith('video')?'🎬':'📷';
+    d.innerHTML=`${ic}<div class="uc">${f.name.slice(0,8)}</div>${f.type.startsWith('video')?'<div class="vb">▶</div>':''}`;
+    d.onclick=()=>{openMo('moMedia');document.getElementById('mmoc').textContent=ic;document.getElementById('mmos').textContent=f.name;};
+    w.appendChild(d);
+  });
+  toast(`📸 ${files.length}件追加しました`);
+  markStep(3,true);
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════
+function openMo(id){document.getElementById(id).classList.add('open');}
+function closeMo(id){document.getElementById(id).classList.remove('open');}
+function openMo(id){document.getElementById(id).classList.add('open');}
+// convenience for media
+function openMo(id,emoji,label){
+  if(id==='moMedia'&&emoji){
+    document.getElementById('mmoc').textContent=emoji;
+    document.getElementById('mmos').textContent=label||'';
+  }
+  document.getElementById(id).classList.add('open');
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);
+}
+</script>
+</body>
+</html>
