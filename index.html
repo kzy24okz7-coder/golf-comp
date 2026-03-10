@@ -922,8 +922,8 @@ async function loadCurrentComp(){
 function parsePlayersFromRows(rows){
   return rows.map(r=>{
     // GASから返る値がオブジェクト（キー参照）か配列かどちらでも動くよう防御
-    const name   = r.name   != null ? String(r.name)   : '';
-    const init   = r.init   != null ? String(r.init)   : (name ? name.slice(0,2).toUpperCase() : '??');
+    const name   = r.name != null && r.name !== '' ? String(r.name) : (r.player_name != null && r.player_name !== '' ? String(r.player_name) : '');
+    const init   = r.init != null && r.init !== '' ? String(r.init) : (r.initials != null && r.initials !== '' ? String(r.initials) : (name ? getInits(name) : '??'));
     const color  = r.color  != null ? String(r.color)  : COLORS[0];
     const hcp    = Number(r.hcp  || 0);
     const gross  = Number(r.gross|| 0);
