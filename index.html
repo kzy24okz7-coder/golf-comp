@@ -924,8 +924,8 @@ function parsePlayersFromRows(rows){
     // GASから返る値がオブジェクト（キー参照）か配列かどちらでも動くよう防御
     const name   = r.name != null && r.name !== '' ? String(r.name) : (r.player_name != null && r.player_name !== '' ? String(r.player_name) : '');
     const init   = r.init != null && r.init !== '' ? String(r.init) : (r.initials != null && r.initials !== '' ? String(r.initials) : (name ? getInits(name) : '??'));
-    const color  = r.color  != null ? String(r.color)  : COLORS[0];
-    const hcp    = Number(r.hcp  || 0);
+    const color  = (r.color != null && String(r.color).trim() !== '' && String(r.color).trim() !== '#') ? String(r.color).trim() : COLORS[0];
+    const hcp    = (r.hcp !== '' && r.hcp !== null && r.hcp !== undefined && !isNaN(Number(r.hcp))) ? Number(r.hcp) : 0;
     const gross  = Number(r.gross|| 0);
     const net    = Number(r.net  || 0);
     const putt   = Number(r.putt || 30);
@@ -1172,12 +1172,12 @@ function doAdd(){
 }
 
 function askDelPlayer(id){
-  const p=players.find(x=>x.id===id);if(!p)return;
+  const p=players.find(x=>String(x.id)===String(id));if(!p)return;
   pendingDelType='player';pendingDelId=id;
   document.getElementById('conf-ico').textContent='🗑️';
   document.getElementById('conf-msg').innerHTML=`<strong>${p.name}</strong> を削除しますか？<br><small>入力したスコアも削除されます。</small>`;
   document.getElementById('conf-ok').textContent='削除する';
-  document.getElementById('conf-ok').onclick=()=>{players=players.filter(x=>x.id!==pendingDelId);renderPList();updateSidebar();closeMo('moConf');toast('🗑️ 削除しました','');};
+  document.getElementById('conf-ok').onclick=()=>{players=players.filter(x=>String(x.id)!==String(pendingDelId));renderPList();updateSidebar();closeMo('moConf');toast('🗑️ 削除しました','');};
   openMo('moConf');
 }
 
@@ -1191,7 +1191,7 @@ function renderPList(){
   w.innerHTML=players.map(p=>{
     const g=calcGross(p),net=g>0?g-p.hcp:0,fc=p.holes.filter(v=>v!=='').length;
     return`<div class="pcard" id="pr${p.id}">
-      <div class="pcard-head" onclick="togP(${p.id})">
+      <div class="pcard-head" onclick="togP('${p.id}')">
         <div class="av" style="color:${p.color};border-color:${p.color};">${p.init}</div>
         <div style="flex:1;min-width:0;"><div class="pname">${p.name}</div><div class="phcp">HCP ${p.hcp}</div></div>
         <div style="text-align:right;margin-right:8px;">${g>0?`<div style="font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--bg2);">${g}</div><div style="font-size:9px;color:var(--ts);">NET ${net}</div>`:`<span style="font-size:10px;color:var(--ts);">${fc>0?fc+'/18H':'未入力'}</span>`}</div>
@@ -1199,9 +1199,9 @@ function renderPList(){
       </div>
       <div class="pbody">
         <div class="sc-section"><div class="sc-section-lbl">OUT</div><div class="sc-section-line"></div><div class="sc-section-tot" id="out${p.id}" style="color:var(--bb);">—</div></div>
-        <div class="sc-grid">${[0,1,2,3,4,5,6,7,8].map(i=>`<div class="sc-cell"><div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div><input class="sc-inp" type="number" min="1" max="15" inputmode="numeric" id="h${p.id}_${i}" value="${p.holes[i]||''}" ${ro?'disabled':''} onchange="onH(${p.id},${i},this.value)" oninput="clrH(this,${PARS[i]})" onfocus="this.select()"><div class="sc-pm">${ro?'':`<div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div><div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>`}</div></div>`).join('')}</div>
+        <div class="sc-grid">${[0,1,2,3,4,5,6,7,8].map(i=>`<div class="sc-cell"><div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div><input class="sc-inp" type="number" min="1" max="15" inputmode="numeric" id="h${p.id}_${i}" value="${p.holes[i]||''}" ${ro?'disabled':''} onchange="onH('${p.id}',${i},this.value)" oninput="clrH(this,${PARS[i]})" onfocus="this.select()"><div class="sc-pm">${ro?'':`<div class="sc-btn" onclick="adjH('${p.id}',${i},-1)">−</div><div class="sc-btn" onclick="adjH('${p.id}',${i},+1)">＋</div>`}</div></div>`).join('')}</div>
         <div class="sc-section" style="margin-top:10px;"><div class="sc-section-lbl">IN</div><div class="sc-section-line"></div><div class="sc-section-tot" id="in${p.id}" style="color:var(--bb);">—</div></div>
-        <div class="sc-grid">${[9,10,11,12,13,14,15,16,17].map(i=>`<div class="sc-cell"><div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div><input class="sc-inp" type="number" min="1" max="15" inputmode="numeric" id="h${p.id}_${i}" value="${p.holes[i]||''}" ${ro?'disabled':''} onchange="onH(${p.id},${i},this.value)" oninput="clrH(this,${PARS[i]})" onfocus="this.select()"><div class="sc-pm">${ro?'':`<div class="sc-btn" onclick="adjH(${p.id},${i},-1)">−</div><div class="sc-btn" onclick="adjH(${p.id},${i},+1)">＋</div>`}</div></div>`).join('')}</div>
+        <div class="sc-grid">${[9,10,11,12,13,14,15,16,17].map(i=>`<div class="sc-cell"><div class="sc-hl">${i+1}</div><div class="sc-par">P${PARS[i]}</div><input class="sc-inp" type="number" min="1" max="15" inputmode="numeric" id="h${p.id}_${i}" value="${p.holes[i]||''}" ${ro?'disabled':''} onchange="onH('${p.id}',${i},this.value)" oninput="clrH(this,${PARS[i]})" onfocus="this.select()"><div class="sc-pm">${ro?'':`<div class="sc-btn" onclick="adjH('${p.id}',${i},-1)">−</div><div class="sc-btn" onclick="adjH('${p.id}',${i},+1)">＋</div>`}</div></div>`).join('')}</div>
         <div class="mst">
           <div class="ms"><div class="mv" id="mg${p.id}">—</div><div class="ml">グロス</div></div>
           <div class="ms"><div class="mv" id="mn${p.id}">—</div><div class="ml">ネット</div></div>
@@ -1210,15 +1210,15 @@ function renderPList(){
         </div>
         ${ro?'':`<div class="dv"></div>
         <div class="xst-grid">
-          <div><div class="xst-row"><span class="xst-label">🏌️ パット</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'putt',-1)">−</div><div class="xst-val" id="xp${p.id}">${p.putt}</div><div class="xst-btn" onclick="adjSt(${p.id},'putt',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div>
-          <div class="xst-row"><span class="xst-label">⚠️ OB</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'ob',-1)">−</div><div class="xst-val" id="xo${p.id}">${p.ob}</div><div class="xst-btn" onclick="adjSt(${p.id},'ob',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div></div>
-          <div><div class="xst-row"><span class="xst-label">🏖️ バンカー</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'bunker',-1)">−</div><div class="xst-val" id="xb${p.id}">${p.bunker}</div><div class="xst-btn" onclick="adjSt(${p.id},'bunker',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div>
-          <div class="xst-row"><span class="xst-label">🌿 FW率</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt(${p.id},'fw',-5)">−</div><div class="xst-val" id="xf${p.id}">${p.fw}</div><div class="xst-btn" onclick="adjSt(${p.id},'fw',+5)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">%</span></div></div></div>
+          <div><div class="xst-row"><span class="xst-label">🏌️ パット</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt('${p.id}','putt',-1)">−</div><div class="xst-val" id="xp${p.id}">${p.putt}</div><div class="xst-btn" onclick="adjSt('${p.id}','putt',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div>
+          <div class="xst-row"><span class="xst-label">⚠️ OB</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt('${p.id}','ob',-1)">−</div><div class="xst-val" id="xo${p.id}">${p.ob}</div><div class="xst-btn" onclick="adjSt('${p.id}','ob',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div></div>
+          <div><div class="xst-row"><span class="xst-label">🏖️ バンカー</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt('${p.id}','bunker',-1)">−</div><div class="xst-val" id="xb${p.id}">${p.bunker}</div><div class="xst-btn" onclick="adjSt('${p.id}','bunker',+1)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">回</span></div></div>
+          <div class="xst-row"><span class="xst-label">🌿 FW率</span><div class="xst-stepper"><div class="xst-btn" onclick="adjSt('${p.id}','fw',-5)">−</div><div class="xst-val" id="xf${p.id}">${p.fw}</div><div class="xst-btn" onclick="adjSt('${p.id}','fw',+5)">＋</div><span style="font-size:9px;color:var(--ts);margin-left:2px;">%</span></div></div></div>
         </div>`}
         <div class="dv"></div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap;">
-          <button class="btn" style="background:rgba(33,150,243,.12);border:1px solid rgba(33,150,243,.35);color:var(--bb);height:36px;font-size:11px;padding:0 14px;" onclick="openEditScoreMo(${p.id})">✏️ スコア修正</button>
-          <button class="btn bdn" onclick="askDelPlayer(${p.id})">🗑️ 削除</button>
+          <button class="btn" style="background:rgba(33,150,243,.12);border:1px solid rgba(33,150,243,.35);color:var(--bb);height:36px;font-size:11px;padding:0 14px;" onclick="openEditScoreMo('${p.id}')">✏️ スコア修正</button>
+          <button class="btn bdn" onclick="askDelPlayer('${p.id}')">🗑️ 削除</button>
         </div>
       </div>
     </div>`;
@@ -1235,7 +1235,7 @@ let editingPlayerId=null;
 let editHoles=[];
 
 function openEditScoreMo(pid){
-  const p=players.find(x=>x.id===pid);if(!p)return;
+  const p=players.find(x=>String(x.id)===String(pid));if(!p)return;
   editingPlayerId=pid;
   editHoles=[...p.holes]; // コピー
 
@@ -1305,7 +1305,7 @@ function updateEditTotals(){
   const out=[0,1,2,3,4,5,6,7,8].reduce((a,i)=>a+(Number(editHoles[i])||0),0);
   const ins=[9,10,11,12,13,14,15,16,17].reduce((a,i)=>a+(Number(editHoles[i])||0),0);
   const gross=out+ins;
-  const p=players.find(x=>x.id===editingPlayerId);
+  const p=players.find(x=>String(x.id)===String(editingPlayerId));
   const net=p&&gross>0?gross-p.hcp:0;
   document.getElementById('es-out-tot').textContent=out||'—';
   document.getElementById('es-in-tot').textContent=ins||'—';
@@ -1315,7 +1315,7 @@ function updateEditTotals(){
 }
 
 function applyEditScore(){
-  const p=players.find(x=>x.id===editingPlayerId);if(!p)return;
+  const p=players.find(x=>String(x.id)===String(editingPlayerId));if(!p)return;
   p.holes=[...editHoles];
   recalc(p.id);
   renderPList(); // カード全体を再描画して反映
@@ -1336,21 +1336,21 @@ function clrH(inp,par){
   else if(v>=par+2)inp.classList.add('dbogey');
 }
 function onH(pid,hi,val){
-  const p=players.find(x=>x.id===pid);if(!p)return;
+  const p=players.find(x=>String(x.id)===String(pid));if(!p)return;
   const v=val===''?'':(parseInt(val)||'');
   if(v!==''&&(v<1||v>15)){const e=document.getElementById(`h${pid}_${hi}`);if(e){e.classList.add('err-val');e.value='';}toast('⚠️ スコアは1〜15で入力してください','warn');p.holes[hi]='';}
   else p.holes[hi]=v;
   recalc(pid);
 }
 function adjH(pid,hi,d){
-  const p=players.find(x=>x.id===pid);if(!p)return;
+  const p=players.find(x=>String(x.id)===String(pid));if(!p)return;
   const cur=p.holes[hi]===''?PARS[hi]:Number(p.holes[hi]);
   const nv=Math.max(1,Math.min(15,cur+d));
   p.holes[hi]=nv;const e=document.getElementById(`h${pid}_${hi}`);if(e){e.value=nv;clrH(e,PARS[hi]);}
   recalc(pid);
 }
 function adjSt(pid,key,d){
-  const p=players.find(x=>x.id===pid);if(!p)return;
+  const p=players.find(x=>String(x.id)===String(pid));if(!p)return;
   const lim={putt:[18,60],ob:[0,20],bunker:[0,20],fw:[0,100]};
   const[mn,mx]=lim[key];p[key]=Math.max(mn,Math.min(mx,(p[key]||0)+d));
   const pm={putt:'xp',ob:'xo',bunker:'xb',fw:'xf'};
@@ -1358,7 +1358,7 @@ function adjSt(pid,key,d){
 }
 function calcGross(p){return p.holes.filter(v=>v!==''&&Number(v)>0).reduce((a,b)=>a+Number(b),0);}
 function recalc(pid){
-  const p=players.find(x=>x.id===pid);if(!p)return;
+  const p=players.find(x=>String(x.id)===String(pid));if(!p)return;
   const out=[0,1,2,3,4,5,6,7,8].reduce((a,i)=>a+(Number(p.holes[i])||0),0);
   const ins=[9,10,11,12,13,14,15,16,17].reduce((a,i)=>a+(Number(p.holes[i])||0),0);
   const g=out+ins;const fc=p.holes.filter(v=>v!=='').length;
