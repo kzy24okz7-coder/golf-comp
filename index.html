@@ -924,17 +924,29 @@ function normalizeMedia(m){
   // 実際のシート列名: media_id, comp_id, file_name, drive_url, type, uploaded_at
   const mediaId  = String(m.media_id   || '');
   const compId   = String(m.comp_id    || '');
-  // name: file_name → name いずれにも対応
   const name     = String(m.file_name  || m.name || '');
-  // url: drive_url → url いずれにも対応
-  const url      = String(m.drive_url  || m.url  || '');
-  // mime_type: type → mime_type いずれにも対応
+  const rawUrl   = String(m.drive_url  || m.url  || '');
   const mimeType = String(m.type       || m.mime_type || '');
-  // thumb_urlはないのでurlを使う
-  const thumbUrl = String(m.thumb_url  || m.thumb || url);
   const uploadedAt = String(m.uploaded_at || '');
+  // ★ uc?export=view 形式は表示できないので thumbnail API に変換
+  const toThumb = (u, sz) => {
+    if (!u) return '';
+    // 既に thumbnail 形式なら sz だけ変える
+    if (u.includes('drive.google.com/thumbnail')) {
+      return u.replace(/sz=w\d+/, 'sz=' + sz);
+    }
+    // uc?export=view&id=xxx 形式から fileId を抽出
+    const m1 = u.match(/[?&]id=([^&]+)/);
+    if (m1) return `https://drive.google.com/thumbnail?id=${m1[1]}&sz=${sz}`;
+    // file/d/xxx/view 形式から fileId を抽出
+    const m2 = u.match(/\/file\/d\/([^/]+)/);
+    if (m2) return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=${sz}`;
+    return u;
+  };
+  const thumbUrl = toThumb(rawUrl, 'w400');
+  const viewUrl  = toThumb(rawUrl, 'w1600');
   return {media_id:mediaId, comp_id:compId, name, mime_type:mimeType,
-          url, thumb_url:thumbUrl, uploaded_at:uploadedAt};
+          url:viewUrl, thumb_url:thumbUrl, uploaded_at:uploadedAt};
 }
 
 function parsePlayersFromRows(rows){
@@ -1456,7 +1468,7 @@ function renderMedia(){
   const ro=MODE==='member';
   w.innerHTML=media.map(m=>`
     <div class="um" onclick="viewMedia('${m.media_id}')">
-      <img src="${m.thumb_url||m.url}" alt="${m.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+      <img src="${m.thumb_url||m.url}" alt="${m.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
       ${m.mime_type&&m.mime_type.startsWith('video')?'<div class="vbg">▶</div>':''}
       <div class="um-overlay"><div class="um-name">${m.name}</div></div>
       ${ro?'':` <button class="um-del" onclick="event.stopPropagation();delMedia('${m.media_id}')">×</button>`}
@@ -1571,7 +1583,18 @@ function bRadar(pls){
 function bGallery(med){
   const w=document.getElementById('galg');if(!w)return;
   if(!med.length){w.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">写真・動画がありません</div>';return;}
-  w.innerHTML=med.map(m=>`<div class="gi" onclick="viewGalMedia('${m.media_id||m.drive_file_id}','${(m.mime_type||'').startsWith('video')?'video':'image'}','${m.url}','${m.name}')"><img src="${m.thumb_url||m.url}" alt="${m.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">${(m.mime_type||'').startsWith('video')?'<div class="gi-vb">▶</div>':''}<div class="gi-overlay"><div class="gi-name">${m.name}</div></div></div>`).join('');
+  // galMediaキャッシュにセット（URLをonclick属性に埋め込むと特殊文字で壊れるためIDで参照）
+  window._galMedia=med;
+  w.innerHTML=med.map((m,i)=>{
+    const isVid=(m.mime_type||'').startsWith('video');
+    const thumb=m.thumb_url||m.url;
+    return `<div class="gi" onclick="viewGalMediaById(${i})">
+      <img src="${thumb}" alt="${m.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"
+           onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')">
+      ${isVid?'<div class="gi-vb">▶</div>':''}
+      <div class="gi-overlay"><div class="gi-name">${m.name}</div></div>
+    </div>`;
+  }).join('');
 }
 
 function viewGalMedia(id,type,url,name){
@@ -1580,6 +1603,20 @@ function viewGalMedia(id,type,url,name){
     ?`<video src="${url}" controls autoplay style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;"></video>`
     :`<img src="${url}" alt="${name}" style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;">`;
   document.getElementById('moImg-name').textContent=name;
+  openMo('moImg');
+}
+
+function viewGalMediaById(idx){
+  const med=window._galMedia;
+  if(!med||!med[idx])return;
+  const m=med[idx];
+  const isVid=(m.mime_type||'').startsWith('video');
+  const box=document.getElementById('moImg-content');
+  box.innerHTML=isVid
+    ?`<video src="${m.url}" controls autoplay style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;"></video>`
+    :`<img src="${m.url}" alt="${m.name}" style="max-width:100%;max-height:65vh;border-radius:8px;display:block;margin:0 auto;"
+           onerror="this.alt='画像を読み込めませんでした';this.style.padding='20px';this.style.color='var(--ts)'">`;
+  document.getElementById('moImg-name').textContent=m.name;
   openMo('moImg');
 }
 
