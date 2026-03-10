@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⛳ Golf Comp Dashboard</title>
+<title>⛳ 近大コンペ</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Orbitron:wght@400;700;900&display=swap');
@@ -394,8 +394,8 @@ input[type=number]{-moz-appearance:textfield;}
   <div class="setup-box">
     <div class="setup-logo">
       <div class="ic">⛳</div>
-      <div class="tx">GOLF COMP</div>
-      <div class="sb">Dashboard v5</div>
+      <div class="tx">近大コンペ</div>
+      <div class="sb">Dashboard kzy.okz_v1.0</div>
     </div>
 
     <div class="setup-sec">① Apps Script URL（必須）</div>
@@ -410,17 +410,17 @@ input[type=number]{-moz-appearance:textfield;}
     <div class="mode-sel">
       <div class="mode-card sel" id="mc-kanji" onclick="selMode('kanji')">
         <div class="mc-ic">🎯</div>
-        <div class="mc-title">幹事モード</div>
+        <div class="mc-title">編集モード</div>
         <div class="mc-sub">スコア入力・写真管理・全機能が使えます</div>
       </div>
       <div class="mode-card" id="mc-member" onclick="selMode('member')">
         <div class="mc-ic">👀</div>
-        <div class="mc-title">メンバーモード</div>
+        <div class="mc-title">参照モード</div>
         <div class="mc-sub">結果・写真の閲覧のみ（リアルタイム更新）</div>
       </div>
     </div>
 
-    <div class="setup-sec">③ 幹事PINコード（幹事モードのみ）</div>
+    <div class="setup-sec">③ 編集PINコード（編集モードのみ）</div>
     <div class="setup-fg" id="pin-area">
       <label>PINコード（数字4桁）</label>
       <input type="number" id="cfg-pin" placeholder="例: 1234" inputmode="numeric" maxlength="4">
@@ -443,7 +443,7 @@ input[type=number]{-moz-appearance:textfield;}
 <!-- ═══ HEADER ═══ -->
 <header>
   <div class="logo-ic">⛳</div>
-  <div><div class="logo-tx">GOLF COMP</div><div class="logo-sb">Live Dashboard</div></div>
+  <div><div class="logo-tx">近大コンペ</div><div class="logo-sb">Dashboard kzy.okz_v1.0</div></div>
   <div class="hdr-r">
     <div class="mode-badge" id="mode-badge">—</div>
     <button class="hpill" id="hp1" onclick="goPg('p1')">📋情報</button>
@@ -494,7 +494,7 @@ input[type=number]{-moz-appearance:textfield;}
 
       <div id="p1-readonly" class="readonly-banner" style="display:none;">
         <span class="rb-ic">👀</span>
-        <span>メンバーモード：閲覧専用です。編集は幹事にお願いください。</span>
+        <span>参照モード：閲覧専用です。編集は編集モードのユーザーにお願いください。</span>
       </div>
 
       <div class="sec">📋 大会情報</div>
@@ -528,7 +528,7 @@ input[type=number]{-moz-appearance:textfield;}
           <div class="prog-step" onclick="goPg('p4')"><div class="prog-dot" style="font-size:11px">📊</div><div class="prog-lbl">結果</div></div>
         </div>
       </div>
-      <div id="p2-readonly" class="readonly-banner" style="display:none;"><span class="rb-ic">👀</span><span>メンバーモード：閲覧専用です。</span></div>
+      <div id="p2-readonly" class="readonly-banner" style="display:none;"><span class="rb-ic">👀</span><span>参照モード：閲覧専用です。</span></div>
       <div class="sec">🏌️ スコア入力</div>
       <div class="card">
         <div style="display:flex;align-items:center;margin-bottom:12px;gap:8px;">
@@ -540,7 +540,7 @@ input[type=number]{-moz-appearance:textfield;}
         <div class="apb" id="apb-btn" onclick="openAddMo()"><span style="font-size:22px;">➕</span><span>参加者を追加する</span><span style="margin-left:auto;font-size:10px;color:var(--ts);" id="apb-hint">最大8名</span></div>
       </div>
       <div class="save-area" id="score-save-area">
-        <div class="sa-info"><div class="sa-title">💾 スコアを保存</div><div class="sa-sub">Googleスプレッドシートに保存。メンバーに即時反映されます。</div><div class="sa-status" id="score-save-st"></div></div>
+        <div class="sa-info"><div class="sa-title">💾 スコアを保存</div><div class="sa-sub">Googleスプレッドシートに保存。参照モードに即時反映されます。</div><div class="sa-status" id="score-save-st"></div></div>
         <button class="btn-save" onclick="saveScores()">💾 スコアを保存</button>
       </div>
       <div class="brow">
@@ -563,7 +563,7 @@ input[type=number]{-moz-appearance:textfield;}
           <div class="prog-step" onclick="goPg('p4')"><div class="prog-dot" style="font-size:11px">📊</div><div class="prog-lbl">結果</div></div>
         </div>
       </div>
-      <div id="p3-readonly" class="readonly-banner" style="display:none;"><span class="rb-ic">👀</span><span>メンバーモード：閲覧専用です。</span></div>
+      <div id="p3-readonly" class="readonly-banner" style="display:none;"><span class="rb-ic">👀</span><span>参照モード：閲覧専用です。</span></div>
       <div class="sec">📸 メディア管理</div>
       <div class="card">
         <div class="ct" style="margin-bottom:10px;"><span>📁</span>写真・動画 <span id="media-count" style="font-size:10px;color:var(--ts);margin-left:4px;"></span></div>
@@ -591,22 +591,13 @@ input[type=number]{-moz-appearance:textfield;}
         <button class="tbtn" onclick="swTab('tan',this)">📈 分析</button>
         <button class="tbtn" onclick="swTab('trd',this)">🎯 レーダー</button>
         <button class="tbtn" onclick="swTab('tgal',this)">📸 写真</button>
+        <button class="tbtn" onclick="swTab('tpers',this)">👤 個人</button>
         <button class="tbtn" onclick="swTab('thist',this)">📜 履歴</button>
       </div>
       <div id="tr">
         <div class="sec">🏅 最終順位</div>
         <div class="rklist" id="rklist"></div>
-        <div class="dv"></div>
-        <div class="sec">🕳️ ホール別ヒートマップ</div>
-        <div class="card">
-          <div class="hmg" id="hmg"></div>
-          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
-            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1a3a2a;"></span>バーディ以下</span>
-            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0d3a5c;"></span>パー</span>
-            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#5c2020;"></span>ボギー</span>
-            <span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7c1a1a;"></span>ダブル+</span>
-          </div>
-        </div>
+<!-- ホール別ヒートマップ: 非表示 -->
       </div>
       <div id="tan" style="display:none;">
         <div class="cg">
@@ -623,6 +614,11 @@ input[type=number]{-moz-appearance:textfield;}
       <div id="tgal" style="display:none;">
         <div class="sec">📸 フォトギャラリー</div>
         <div class="gal" id="galg"></div>
+      </div>
+      <div id="tpers" style="display:none;">
+        <div class="sec">👤 個人成績まとめ</div>
+        <div id="pers-sel" style="display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;"></div>
+        <div id="pers-content"></div>
       </div>
       <div id="thist" style="display:none;">
         <div class="sec">📜 全コンペ履歴</div>
@@ -731,11 +727,12 @@ input[type=number]{-moz-appearance:textfield;}
 </div>
 
 <!-- IMAGE VIEWER -->
-<div class="mo" id="moImg" onclick="closeMo('moImg')">
-  <div class="mob" style="max-width:640px;background:#000;border-radius:12px;padding:10px;">
+<div class="mo" id="moImg">
+  <div class="mob" style="max-width:640px;background:#000;border-radius:12px;padding:16px;position:relative;">
     <div class="mob-handle"></div>
-    <div id="moImg-content"></div>
-    <div id="moImg-name" style="text-align:center;font-size:11px;color:var(--ts);margin-top:8px;"></div>
+    <button onclick="closeMo('moImg')" style="position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;line-height:1;flex-shrink:0;">✕</button>
+    <div id="moImg-content" style="margin-top:8px;"></div>
+    <div id="moImg-name" style="text-align:center;font-size:11px;color:var(--ts);margin-top:8px;padding:0 40px;"></div>
   </div>
 </div>
 
@@ -749,7 +746,7 @@ Chart.defaults.font.family="'Noto Sans JP',sans-serif";
 
 const PARS=[4,5,3,4,4,5,3,4,4,4,3,5,4,4,3,5,4,4];
 const PAR_TOTAL=PARS.reduce((a,b)=>a+b,0);
-const MAX_PLAYERS=8;
+const MAX_PLAYERS=12;
 const COLORS=['#2196f3','#f5c842','#00e676','#ff5252','#ce93d8','#ff9800','#4dd0e1','#aed581'];
 const CFG_KEY='golf_cfg_v5';
 const AUTO_SYNC_INTERVAL=30000; // 30秒ごと自動同期（メンバーモード）
@@ -822,7 +819,7 @@ async function startApp(){
 
   // 接続テスト
   document.getElementById('setup-screen').style.display='none';
-  showLoading('接続中...');
+  showLoading('データ取得中...');
   try {
     await loadComps();
     hideLoading();
@@ -835,7 +832,8 @@ async function startApp(){
     renderCompStrips();
     updateSidebar();
     startAutoSync();
-    toast('✅ 接続成功しました','ok');
+    setTimeout(()=>toast('✅ 接続成功しました','ok'),200);
+    setTimeout(()=>{const t=document.getElementById('toast');if(t.textContent.includes('接続成功'))t.className='';},1200);
   }catch(e){
     hideLoading();
     document.getElementById('setup-screen').style.display='flex';
@@ -848,7 +846,7 @@ function applyMode(){
   // badge
   const b=document.getElementById('mode-badge');
   b.className='mode-badge '+(isKaniji?'kanji':'member');
-  b.textContent=isKaniji?'🎯 幹事':'👀 メンバー';
+  b.textContent=isKaniji?'🎯 編集':'👀 参照';
   // readonly banners
   ['p1','p2','p3'].forEach(p=>{
     const el=document.getElementById(p+'-readonly');
@@ -1066,7 +1064,7 @@ async function saveScores(){
     const r=await gasPost({action:'saveScores',comp_id:currentCompId,players});
     if(!r.ok)throw new Error(r.error);
     const now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('score-save-st').textContent=`✅ ${now} 保存済み - メンバーに反映されました`;
+    document.getElementById('score-save-st').textContent=`✅ ${now} 保存済み - 参照モードに反映されました`;
     document.getElementById('score-save-st').style.color='var(--gr)';
     markStep(2,true);
     toast('✅ スコアをスプレッドシートに保存しました','ok');
@@ -1105,7 +1103,7 @@ async function doDelComp(){
 // ════════════════════════════════════════════════════
 function startAutoSync(){
   if(syncTimer)clearInterval(syncTimer);
-  // メンバーモードは自動同期、幹事モードは手動のみ
+  // 参照モードは自動同期、編集モードは手動のみ
   if(MODE==='member'){
     syncTimer=setInterval(syncAll,AUTO_SYNC_INTERVAL);
   }
@@ -1501,7 +1499,7 @@ async function delMedia(id){
 // ════════════════════════════════════════════════════
 function buildRes(comp,pls,med){
   Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};
-  bStats(comp,pls);bRanking(pls);bHeatmap(pls);bCharts(pls);bRadar(pls);bGallery(med);bHistory();
+  bStats(comp,pls);bRanking(pls);/*bHeatmap(pls);*/bCharts(pls);bRadar(pls);bGallery(med);bHistory();
 }
 
 function bStats(comp,pls){
@@ -1633,6 +1631,190 @@ function bHistory(){
 }
 
 // ════════════════════════════════════════════════════
+//  個人成績まとめ
+// ════════════════════════════════════════════════════
+// 全コンペのスコアをキャッシュ（comp_id → players配列）
+let allCompScores={};
+
+async function bPersonalTab(){
+  const sel=document.getElementById('pers-sel');
+  const content=document.getElementById('pers-content');
+  if(!sel||!content)return;
+  if(!comps.length){
+    content.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">コンペデータがありません</div>';
+    return;
+  }
+  content.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;text-align:center;">📊 データ集計中...</div>';
+
+  // 全コンペのスコアを取得（未キャッシュのもののみ）
+  for(const comp of comps){
+    if(!allCompScores[comp.comp_id]){
+      try{
+        const sr=await gasGet({action:'getScores',comp_id:comp.comp_id});
+        allCompScores[comp.comp_id]=sr.ok?parsePlayersFromRows(sr.data):[];
+      }catch(e){allCompScores[comp.comp_id]=[];}
+    }
+  }
+
+  // 全プレイヤー名を収集（名前で統合）
+  const nameMap={};
+  Object.values(allCompScores).forEach(pls=>{
+    pls.forEach(p=>{
+      const key=p.name.trim();
+      if(!key)return;
+      if(!nameMap[key]){nameMap[key]={name:key,init:p.init,color:p.color,records:[]};}
+      nameMap[key].records.push(p);
+    });
+  });
+
+  const names=Object.keys(nameMap).sort();
+  if(!names.length){
+    content.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">スコアデータがありません</div>';
+    sel.innerHTML='';
+    return;
+  }
+
+  // 選択ボタン描画
+  let selName=names[0];
+  const renderSel=()=>{
+    sel.innerHTML=names.map(n=>`
+      <button onclick="selectPerson('${n}')" id="pb_${n.replace(/\s/g,'_')}"
+        style="flex-shrink:0;height:34px;padding:0 14px;border-radius:17px;border:1px solid ${nameMap[n].color};
+        background:${n===selName?nameMap[n].color+'33':'transparent'};
+        color:${n===selName?nameMap[n].color:'var(--ts)'};font-size:12px;cursor:pointer;white-space:nowrap;
+        font-family:'Noto Sans JP',sans-serif;transition:.2s;">${n}</button>`).join('');
+  };
+
+  window.selectPerson=(name)=>{
+    selName=name;
+    renderSel();
+    renderPersonDetail(nameMap[name]);
+  };
+
+  renderSel();
+  renderPersonDetail(nameMap[selName]);
+}
+
+function renderPersonDetail(pd){
+  const content=document.getElementById('pers-content');
+  if(!content)return;
+  const recs=pd.records;
+  const n=recs.length;
+  if(!n){content.innerHTML='<div style="color:var(--ts);font-size:13px;padding:16px;">データなし</div>';return;}
+
+  // 集計
+  const grossList=recs.map(r=>r.gross||calcGross(r)).filter(v=>v>0);
+  const netList=recs.map(r=>{const g=r.gross||calcGross(r);return g>0?g-r.hcp:0;}).filter(v=>v>0);
+  const avgGross=grossList.length?Math.round(grossList.reduce((a,b)=>a+b,0)/grossList.length):0;
+  const avgNet=netList.length?Math.round(netList.reduce((a,b)=>a+b,0)/netList.length*10)/10:0;
+  const bestGross=grossList.length?Math.min(...grossList):0;
+  const bestNet=netList.length?Math.min(...netList):0;
+  const avgPutt=recs.filter(r=>r.putt).length?Math.round(recs.reduce((a,r)=>a+(r.putt||0),0)/n):0;
+  const avgOb=recs.filter(r=>r.ob!=null).length?Math.round(recs.reduce((a,r)=>a+(r.ob||0),0)/n*10)/10:0;
+  const avgBunker=recs.filter(r=>r.bunker!=null).length?Math.round(recs.reduce((a,r)=>a+(r.bunker||0),0)/n*10)/10:0;
+  const avgFw=recs.filter(r=>r.fw).length?Math.round(recs.reduce((a,r)=>a+(r.fw||0),0)/n):0;
+
+  // ホール別平均スコア
+  const holeAvgs=Array.from({length:18},(_,i)=>{
+    const vals=recs.map(r=>r.holes[i]).filter(v=>v!==''&&v!=null&&!isNaN(Number(v))).map(Number);
+    return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10:null;
+  });
+
+  // 推移データ（コンペ順）
+  const trend=comps.slice().reverse().map(comp=>{
+    const pls=allCompScores[comp.comp_id]||[];
+    const p=pls.find(x=>x.name.trim()===pd.name);
+    if(!p)return null;
+    const g=p.gross||calcGross(p);
+    return{title:comp.title||comp.comp_id,gross:g>0?g:null,net:g>0?g-p.hcp:null};
+  }).filter(x=>x&&x.gross);
+
+  const col=pd.color;
+
+  content.innerHTML=`
+  <!-- サマリーカード -->
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
+    ${[
+      ['🏌️ 参加回数',`${n}回`],
+      ['📊 平均グロス',avgGross?avgGross+'':'-'],
+      ['🎯 平均ネット',avgNet?avgNet+'':'-'],
+      ['🏆 ベストグロス',bestGross?bestGross+'':'-'],
+      ['✨ ベストネット',bestNet?bestNet+'':'-'],
+      ['🏌️ 平均パット',avgPutt?avgPutt+'回':'-'],
+    ].map(([l,v])=>`
+      <div style="background:var(--card2);border:1px solid var(--br);border-radius:10px;padding:12px 10px;text-align:center;">
+        <div style="font-size:9px;color:var(--ts);margin-bottom:4px;">${l}</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:${col};">${v}</div>
+      </div>`).join('')}
+  </div>
+
+  <!-- スタッツカード -->
+  <div style="background:var(--card2);border:1px solid var(--br);border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:10px;color:var(--ts);letter-spacing:1px;margin-bottom:10px;">📈 平均スタッツ</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">
+      ${[['⚠️ OB',avgOb+'回'],['🏖️ バンカー',avgBunker+'回'],['🌿 FW率',avgFw+'%']]
+        .map(([l,v])=>`<div><div style="font-size:9px;color:var(--ts);">${l}</div><div style="font-size:15px;font-weight:700;color:var(--bg2);margin-top:2px;">${v}</div></div>`).join('')}
+    </div>
+  </div>
+
+  <!-- グロス推移グラフ -->
+  ${trend.length>=2?`
+  <div style="background:var(--card2);border:1px solid var(--br);border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:10px;color:var(--ts);letter-spacing:1px;margin-bottom:10px;">📉 グロス推移</div>
+    <canvas id="pers-trend" height="140"></canvas>
+  </div>`:''}
+
+  <!-- ホール別平均スコア -->
+  <div style="background:var(--card2);border:1px solid var(--br);border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:10px;color:var(--ts);letter-spacing:1px;margin-bottom:10px;">⛳ ホール別平均スコア</div>
+    <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:3px;">
+      ${holeAvgs.map((v,i)=>{
+        const par=PARS[i];
+        const diff=v!=null?v-par:null;
+        const bg=diff==null?'var(--bd)':diff<0?'#1a4a2a':diff===0?'#0d3a5c':diff===1?'#5c2a0a':'#5c0a0a';
+        const fc=diff==null?'var(--ts)':diff<0?'var(--gr)':diff===0?'var(--bg2)':diff===1?'#ff9800':'var(--rd)';
+        return`<div style="background:${bg};border-radius:4px;padding:4px 2px;text-align:center;">
+          <div style="font-size:8px;color:var(--ts);">${i+1}H</div>
+          <div style="font-size:11px;font-weight:700;color:${fc};">${v!=null?v:'-'}</div>
+          <div style="font-size:7px;color:var(--ts);">P${par}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+      ${[['#1a4a2a','var(--gr)','バーディ以下'],['#0d3a5c','var(--bg2)','パー'],['#5c2a0a','#ff9800','ボギー'],['#5c0a0a','var(--rd)','ダブル+']]
+        .map(([bg,fc,l])=>`<span style="font-size:9px;color:var(--ts);display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${bg};"></span>${l}</span>`).join('')}
+    </div>
+  </div>`;
+
+  // グラフ描画
+  if(trend.length>=2){
+    requestAnimationFrame(()=>{
+      const ctx=document.getElementById('pers-trend');
+      if(!ctx)return;
+      if(ctx._chart)ctx._chart.destroy();
+      ctx._chart=new Chart(ctx,{
+        type:'line',
+        data:{
+          labels:trend.map(t=>t.title),
+          datasets:[
+            {label:'グロス',data:trend.map(t=>t.gross),borderColor:col,backgroundColor:col+'33',borderWidth:2,pointRadius:4,pointBackgroundColor:col,tension:.3,fill:true},
+            {label:'ネット',data:trend.map(t=>t.net),borderColor:'var(--bg2)',backgroundColor:'rgba(0,200,255,.1)',borderWidth:1.5,pointRadius:3,pointBackgroundColor:'var(--bg2)',tension:.3,borderDash:[4,3]},
+          ]
+        },
+        options:{
+          responsive:true,
+          plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10},color:'#78a6c8'}}},
+          scales:{
+            y:{grid:{color:'rgba(33,150,243,.1)'},ticks:{color:'#78a6c8',font:{size:9}}},
+            x:{grid:{color:'rgba(33,150,243,.06)'},ticks:{color:'#78a6c8',font:{size:9},maxRotation:30}}
+          }
+        }
+      });
+    });
+  }
+}
+
+// ════════════════════════════════════════════════════
 //  PAGE NAV
 // ════════════════════════════════════════════════════
 const PGS=['p1','p2','p3','p4'],SBS=['s1','s2','s3','s4'],MBS=['mb1','mb2','mb3','mb4'],HPS=['hp1',null,null,'hp4'];
@@ -1651,7 +1833,7 @@ function goPg(id){
   }
 }
 function markStep(n,done){document.getElementById('d'+n).style.background=done?'var(--gr)':'';document.getElementById('s'+n).classList.toggle('done',done);}
-function swTab(id,btn){['tr','tan','trd','tgal','thist'].forEach(t=>{const e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none';});document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');}
+function swTab(id,btn){if(id==='tpers')bPersonalTab();['tr','tan','trd','tgal','tpers','thist'].forEach(t=>{const e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none';});document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');}
 function updateSidebar(){
   const c=comps.find(x=>x.comp_id===currentCompId);
   document.getElementById('sb-comp').textContent=c?c.title||'（未設定）':'—';
